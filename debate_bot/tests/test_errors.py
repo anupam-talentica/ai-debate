@@ -63,8 +63,8 @@ async def test_con_opening_memory_upsert_fails(base_state, mock_llm):
 @pytest.mark.asyncio
 async def test_graph_execution_with_invalid_state():
     """Graph should handle invalid state transitions."""
-    from app import graph
-    from state import DebateState
+    from app import src.core.graph as graph
+    from src.core.state import DebateState
 
     invalid_state: DebateState = {
         "topic": "",  # Invalid: empty topic
@@ -143,7 +143,7 @@ async def test_debate_invoke_with_execution_timeout(base_state):
 async def test_memory_store_chroma_fallback():
     """Memory store should fallback to InMemory gracefully."""
     with patch("memory.Chroma", side_effect=ImportError("chromadb not available")):
-        from memory import MemoryStore
+        from src.core.memory import MemoryStore
         # Should not raise, should use InMemory
         store = MemoryStore(persist_directory="/tmp/test")
         assert store.store is not None

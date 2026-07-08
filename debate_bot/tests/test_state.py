@@ -1,5 +1,5 @@
 import pytest
-from state import DebateState
+from src.core.state import DebateState
 
 
 def test_debate_state_structure():

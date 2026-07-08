@@ -133,7 +133,7 @@ async def test_debate_with_null_values_in_state(base_state):
     base_state["pro_opening"] = None
     base_state["con_opening"] = None
     # Should handle None gracefully
-    from app import graph
+    from app import src.core.graph as graph
     # This might fail validation, which is expected
 
 
@@ -174,7 +174,7 @@ async def test_http_post_debate_invoke_with_empty_body():
 async def test_state_with_mismatched_field_types(base_state):
     """State with wrong field types should fail validation."""
     base_state["round"] = 123  # Should be str
-    from state import DebateState
+    from src.core.state import DebateState
     # Should fail TypedDict validation
 
 
@@ -196,7 +196,7 @@ async def test_moderator_decision_with_both_closings_empty(base_state, mock_llm)
 @pytest.mark.asyncio
 async def test_memory_store_with_special_characters_in_debate():
     """Memory store should handle special characters in debate content."""
-    from memory import MemoryStore
+    from src.core.memory import MemoryStore
 
     store = MemoryStore()
     state = {

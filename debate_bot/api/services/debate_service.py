@@ -4,7 +4,7 @@ import logging
 from typing import AsyncGenerator
 
 from app import run_debate, graph, memory_store
-from state import DebateState
+from src.core.state import DebateState
 from .exceptions import DebateExecutionError, DebateTimeoutError
 
 logger = logging.getLogger(__name__)

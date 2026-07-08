@@ -1,5 +1,5 @@
 import pytest
-from memory import MemoryStore
+from src.core.memory import MemoryStore
 
 
 def test_upsert_and_retrieve():

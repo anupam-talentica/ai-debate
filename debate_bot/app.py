@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from graph import build_graph
-from memory import MemoryStore
+from src.core.graph import build_graph
+from src.core.memory import MemoryStore
 
 memory_store = MemoryStore()
 graph = build_graph(memory_store)

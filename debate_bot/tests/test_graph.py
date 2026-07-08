@@ -12,8 +12,8 @@ async def test_full_graph_runs_to_completion():
         instance = MockLLM.return_value
         instance.astream = MagicMock(side_effect=astream_side_effect)
 
-        from graph import build_graph
-        from memory import MemoryStore
+        from src.core.graph import build_graph
+        from src.core.memory import MemoryStore
 
         graph = build_graph(MemoryStore())
         state = await graph.ainvoke({
@@ -45,8 +45,8 @@ async def test_graph_includes_memory_context():
             return_value=aiter(["Winner: ", "Con."])
         )
 
-        from graph import build_graph
-        from memory import MemoryStore
+        from src.core.graph import build_graph
+        from src.core.memory import MemoryStore
 
         graph = build_graph(MemoryStore())
         state = await graph.ainvoke({

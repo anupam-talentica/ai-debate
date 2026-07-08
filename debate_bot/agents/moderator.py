@@ -1,8 +1,8 @@
 import os
 from dotenv import load_dotenv
 from langchain_anthropic import ChatAnthropic
-from state import DebateState
-from prompts import MODERATOR_DECISION
+from src.core.state import DebateState
+from src.core.prompts import MODERATOR_DECISION
 
 load_dotenv()
 

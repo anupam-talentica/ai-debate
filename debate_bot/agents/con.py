@@ -1,9 +1,9 @@
 import os
 from dotenv import load_dotenv
 from langchain_anthropic import ChatAnthropic
-from state import DebateState
-from prompts import CON_OPENING, CON_REBUTTAL, CON_CLOSING, build_memory_block
-from memory import retrieve_context
+from src.core.state import DebateState
+from src.core.prompts import CON_OPENING, CON_REBUTTAL, CON_CLOSING, build_memory_block
+from src.core.memory import retrieve_context
 
 load_dotenv()
 

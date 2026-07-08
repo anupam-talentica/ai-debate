@@ -2,8 +2,8 @@ import asyncio, os
 from dotenv import load_dotenv
 load_dotenv()
 
-from graph import debate_graph
-from memory import upsert_debate, retrieve_context
+from src.core.graph import debate_graph
+from src.core.memory import upsert_debate, retrieve_context
 
 initial_state = {
     "topic": "Should AI be used in hiring?",
