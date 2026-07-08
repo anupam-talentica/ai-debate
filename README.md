@@ -5,30 +5,36 @@ A structured real-time debate platform powered by Claude, featuring three LangGr
 ## Project Structure
 
 ```
-├── debate_bot/                 # Main application
-│   ├── src/                   # Core application code (future organization)
-│   ├── api/                   # API endpoints
-│   ├── agents/                # LangGraph agent definitions
-│   ├── deployment/            # Deployment configurations (Docker, K8s)
-│   ├── docs/                  # Comprehensive documentation
-│   │   ├── ARCHITECTURE.md    # System architecture
-│   │   ├── PRODUCTION_GUIDE.md # Production deployment guide
-│   │   ├── QUICKSTART.md      # Quick start guide
-│   │   └── TRD/               # Technical reference documents
-│   ├── tests/                 # Test suite
-│   ├── app.py                 # FastAPI application entry point
-│   ├── server.py              # Server configuration
-│   ├── graph.py               # LangGraph workflow
-│   ├── state.py               # Agent state definitions
-│   ├── memory.py              # Memory management
-│   ├── prompts.py             # Agent prompts
-│   ├── Dockerfile             # Container configuration
-│   ├── docker-compose.yml     # Docker Compose setup
-│   ├── requirements.txt        # Python dependencies
-│   └── README.md              # App-specific documentation
-├── .claude/                    # Claude Code configuration
-├── .debatenv/                  # Python virtual environment
-└── README.md                   # This file
+├── debate_bot/                    # Main application
+│   ├── src/
+│   │   ├── core/                 # Core agentic system
+│   │   │   ├── graph.py          # LangGraph workflow orchestration
+│   │   │   ├── state.py          # Agent state definitions
+│   │   │   ├── memory.py         # Memory management
+│   │   │   └── prompts.py        # Prompt templates
+│   │   ├── agents/               # Agent implementations
+│   │   └── api/                  # API routes and services
+│   ├── notebooks/                # Jupyter notebooks for exploration
+│   │   ├── debate.ipynb
+│   │   └── debate_debug.ipynb
+│   ├── deployment/               # Deployment configurations (Docker, K8s)
+│   ├── docs/                     # Comprehensive documentation
+│   │   ├── ARCHITECTURE.md       # System architecture
+│   │   ├── PRODUCTION_GUIDE.md   # Production deployment guide
+│   │   ├── QUICKSTART.md         # Quick start guide
+│   │   └── TRD*.md               # Technical reference documents
+│   ├── tests/                    # Test suite
+│   ├── app.py                    # FastAPI application entry point
+│   ├── server.py                 # Server configuration
+│   ├── Dockerfile                # Container configuration
+│   ├── docker-compose.yml        # Docker Compose setup
+│   ├── requirements.txt           # Python dependencies
+│   └── README.md                 # App-specific documentation
+├── .claude/                       # Claude Code configuration
+├── .debatenv/                     # Python virtual environment
+├── .gitignore                     # Git ignore rules
+├── CLAUDE.md                      # Claude Code development guide
+└── README.md                      # This file
 ```
 
 ## Quick Start

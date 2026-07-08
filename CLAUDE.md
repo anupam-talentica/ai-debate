@@ -18,28 +18,38 @@ This is a FastAPI-based agentic system featuring LangGraph orchestration of mult
 ### Application Structure
 ```
 debate_bot/
-├── api/                    # FastAPI route handlers
-├── agents/                 # Agent definitions and logic
-├── deployment/             # Deployment configurations
+├── src/
+│   ├── core/               # Core agentic system
+│   │   ├── graph.py        # LangGraph workflow orchestration
+│   │   ├── state.py        # Agent state type definitions
+│   │   ├── memory.py       # Memory management and persistence
+│   │   └── prompts.py      # Agent prompt templates
+│   ├── agents/             # Agent implementations (Pro, Con, Moderator)
+│   └── api/                # FastAPI routes and services
+├── notebooks/              # Jupyter notebooks for exploration & debugging
+│   ├── debate.ipynb
+│   └── debate_debug.ipynb
+├── deployment/             # Deployment configurations (Docker, K8s)
 ├── docs/                   # All documentation (40+ docs, TRDs, guides)
 ├── tests/                  # Test suite
-├── app.py                  # FastAPI application factory
-├── server.py               # Server setup and execution
-├── graph.py                # LangGraph workflow orchestration
-├── state.py                # Type definitions for agent state
-├── memory.py               # Memory management and persistence
-└── prompts.py              # Agent prompts and templates
+├── app.py                  # FastAPI application factory (entry point)
+├── server.py               # Server setup and execution (entry point)
+├── Dockerfile              # Container image definition
+├── docker-compose.yml      # Local development stack setup
+└── requirements.txt        # Python dependencies
 ```
 
 ### Key Files
 
 - **`app.py`** - FastAPI application initialization and configuration
 - **`server.py`** - Main server entry point
-- **`graph.py`** - LangGraph agent workflow definition
-- **`agents/`** - Individual agent implementations (Pro, Con, Moderator)
-- **`api/`** - FastAPI route definitions for debate endpoints
-- **`Dockerfile`** - Container image definition
-- **`docker-compose.yml`** - Local development stack setup
+- **`src/core/graph.py`** - LangGraph agent workflow definition
+- **`src/core/state.py`** - Agent state type definitions
+- **`src/core/memory.py`** - Memory management system
+- **`src/core/prompts.py`** - Prompt templates for agents
+- **`src/agents/`** - Individual agent implementations (Pro, Con, Moderator)
+- **`src/api/`** - FastAPI route definitions for debate endpoints
+- **`notebooks/`** - Jupyter notebooks for experimentation and debugging
 
 ## Environment Setup
 
