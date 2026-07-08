@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from dotenv import load_dotenv
 
-from api.routes.debates import router as debates_router
+from src.api.routes.debates import router as debates_router
 
 load_dotenv()
 

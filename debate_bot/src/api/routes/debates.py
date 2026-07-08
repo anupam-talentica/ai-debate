@@ -2,9 +2,9 @@ import logging
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import StreamingResponse
 
-from api.schemas import DebateRequest, DebateResponse, HealthResponse
-from api.services.debate_service import DebateService
-from api.services.exceptions import (
+from src.api.schemas import DebateRequest, DebateResponse, HealthResponse
+from src.api.services.debate_service import DebateService
+from src.api.services.exceptions import (
     DebateExecutionError,
     DebateTimeoutError,
 )

@@ -1,8 +1,8 @@
 from langgraph.graph import StateGraph, END
-from state import DebateState
-from agents.moderator import moderator_open, moderator_checkpoint, moderator_decision
-from agents.pro import pro_opening, pro_rebuttal, pro_closing
-from agents.con import con_opening, con_rebuttal, con_closing
+from src.core.state import DebateState
+from src.agents.moderator import moderator_open, moderator_checkpoint, moderator_decision
+from src.agents.pro import pro_opening, pro_rebuttal, pro_closing
+from src.agents.con import con_opening, con_rebuttal, con_closing
 from typing import Optional, Any
 
 
