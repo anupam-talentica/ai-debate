@@ -6,23 +6,32 @@ A structured real-time debate platform powered by Claude, featuring three LangGr
 
 ```
 ├── debate_bot/                    # Main application
-│   ├── src/
+│   ├── src/                      # All application code
 │   │   ├── core/                 # Core agentic system
 │   │   │   ├── graph.py          # LangGraph workflow orchestration
 │   │   │   ├── state.py          # Agent state definitions
 │   │   │   ├── memory.py         # Memory management
 │   │   │   └── prompts.py        # Prompt templates
 │   │   ├── agents/               # Agent implementations
+│   │   │   ├── pro.py
+│   │   │   ├── con.py
+│   │   │   └── moderator.py
 │   │   └── api/                  # API routes and services
+│   │       ├── routes/
+│   │       │   └── debates.py
+│   │       ├── services/
+│   │       │   ├── debate_service.py
+│   │       │   └── exceptions.py
+│   │       └── schemas.py
 │   ├── notebooks/                # Jupyter notebooks for exploration
 │   │   ├── debate.ipynb
 │   │   └── debate_debug.ipynb
-│   ├── deployment/               # Deployment configurations (Docker, K8s)
 │   ├── docs/                     # Comprehensive documentation
 │   │   ├── ARCHITECTURE.md       # System architecture
 │   │   ├── PRODUCTION_GUIDE.md   # Production deployment guide
 │   │   ├── QUICKSTART.md         # Quick start guide
-│   │   └── TRD*.md               # Technical reference documents
+│   │   ├── TRD*.md               # Technical reference documents
+│   │   └── deployment/           # Deployment guides and research
 │   ├── tests/                    # Test suite
 │   ├── app.py                    # FastAPI application entry point
 │   ├── server.py                 # Server configuration

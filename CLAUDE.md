@@ -18,19 +18,28 @@ This is a FastAPI-based agentic system featuring LangGraph orchestration of mult
 ### Application Structure
 ```
 debate_bot/
-├── src/
+├── src/                    # All application code
 │   ├── core/               # Core agentic system
 │   │   ├── graph.py        # LangGraph workflow orchestration
 │   │   ├── state.py        # Agent state type definitions
 │   │   ├── memory.py       # Memory management and persistence
 │   │   └── prompts.py      # Agent prompt templates
 │   ├── agents/             # Agent implementations (Pro, Con, Moderator)
+│   │   ├── pro.py
+│   │   ├── con.py
+│   │   └── moderator.py
 │   └── api/                # FastAPI routes and services
+│       ├── routes/
+│       │   └── debates.py
+│       ├── services/
+│       │   ├── debate_service.py
+│       │   └── exceptions.py
+│       └── schemas.py
 ├── notebooks/              # Jupyter notebooks for exploration & debugging
 │   ├── debate.ipynb
 │   └── debate_debug.ipynb
-├── deployment/             # Deployment configurations (Docker, K8s)
 ├── docs/                   # All documentation (40+ docs, TRDs, guides)
+│   └── deployment/         # Deployment guides and research
 ├── tests/                  # Test suite
 ├── app.py                  # FastAPI application factory (entry point)
 ├── server.py               # Server setup and execution (entry point)
