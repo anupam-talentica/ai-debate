@@ -1,0 +1,11 @@
+$ EVAL_CACHE_DEBATES=false python -m pytest tests/deepeval_promptfoo/deepeval/test_debate_deepeval.py -m eval -k winner-trap
+
+============ 3 passed, 6 deselected, 4 warnings in 64.10s (0:01:04) ============
+
+Notes:
+- EVAL_CACHE_DEBATES=false forces a live debate every run, bypassing the
+  cache entirely (neither read nor written).
+- Runtime back up to 64.10s, matching the original cache-miss run
+  (03_winner_trap_cache_miss.txt), confirming the disable flag works.
+- Existing cache file's mtime (Jul 17 06:44:25 2026) left untouched by this
+  run, confirming it was neither read nor overwritten while disabled.

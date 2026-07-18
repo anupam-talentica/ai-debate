@@ -160,6 +160,34 @@ pytest tests/ --cov=. --cov-report=term-missing -k "not e2e"
 
 ---
 
+## Running Evals (LLM-as-judge scorecard)
+
+The `tests/custom_pytest/evals/` harness runs the **real** model over a dataset of
+topics and scores debate behavior with (1) deterministic Python checks and (2) an
+LLM-as-judge. It emits a markdown scorecard and `results.json`. Zero new dependencies.
+
+```bash
+cd debate_bot
+export ANTHROPIC_API_KEY=...              # required
+export JUDGE_MODEL_NAME=claude-sonnet-5   # optional; stronger model grades Haiku debates
+
+# Full dataset (~15 topics)
+python -m tests.custom_pytest.evals.run_evals
+
+# Quick slice (first 3 topics)
+python -m tests.custom_pytest.evals.run_evals --limit 3
+```
+
+As a CI gate (opt-in — deselected by default via the `eval` marker):
+```bash
+ANTHROPIC_API_KEY=... pytest -m eval tests/custom_pytest/evals/test_evals.py
+```
+
+See `docs/EVALUATION_APPROACHES.md` for the four eval dimensions and
+`tests/custom_pytest/PLAN.md` for the harness design.
+
+---
+
 ## Endpoints in Detail
 
 ### `GET /health`

@@ -1,0 +1,16 @@
+# Optional evaluation dependencies (Approach C — deepeval / promptfoo).
+#
+# These are NOT needed to run or serve the debate system. They are only used by
+# the eval harness in tests/deepeval_promptfoo/. Kept out of requirements.txt so
+# the runtime/Docker image stays lean.
+#
+#   pip install -r requirements-eval.txt
+#
+# deepeval brings in the GEval rubric metrics. The judge model is Claude via
+# langchain-anthropic (already a runtime dep), wired through deepeval's custom
+# model interface — see tests/deepeval_promptfoo/deepeval/judge.py.
+deepeval>=1.0
+
+# promptfoo (Option C2) is a Node CLI, not a Python package:
+#   npx promptfoo@latest eval
+# It is documented in tests/deepeval_promptfoo/README.md and needs no pip install.

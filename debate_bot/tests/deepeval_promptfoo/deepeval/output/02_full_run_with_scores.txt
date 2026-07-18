@@ -1,0 +1,44 @@
+[ai-jobs] relevance: score=1.00 (threshold=0.7)
+reason: The output clearly and consistently argues in favor of the topic 'AI will replace software engineers,' using economic logic, current evidence (60-80% task automation), and projected timelines to support the pro stance. It stays fully on-topic without drifting into unrelated subjects. The argument is substantive, well-structured with clear claims and reasoning, and not generic or degenerate. It fulfills all four evaluation criteria effectively.
+PASSED
+tests/deepeval_promptfoo/deepeval/test_debate_deepeval.py::test_debate_rubric[ai-jobs-rebuttal_engagement] 
+--
+[ai-jobs] rebuttal_engagement: score=0.90 (threshold=0.7)
+reason: The Con rebuttal directly engages with specific Pro claims: it quotes the "60-80% of routine tasks" statistic and refutes it by arguing routine tasks aren't the core value of engineering; it addresses the speed comparison (300 vs 3,000 lines) by countering with review/debugging overhead; it counters the 'automation displaces workers' historical argument by citing the opposite historical pattern of tools expanding the field; and it responds to the overall replacement thesis with an accountability argument. Each point is tied to a specific Pro claim rather than being a generic anti-topic statement, fulfilling the evaluation criteria for specificity and direct engagement. The rebuttal is well-structured and reasoned, though the accountability point is slightly more general and less directly tied to a specific Pro quote. Overall it strongly meets the criteria for referencing and refuting Pro's actual reasoning.
+PASSED
+tests/deepeval_promptfoo/deepeval/test_debate_deepeval.py::test_debate_rubric[ai-jobs-moderator_soundness] 
+--
+[ai-jobs] moderator_soundness: score=0.90 (threshold=0.7)
+reason: The moderator's decision accurately reflects both closings: Pro's claim of overwhelming evidence/expert consensus and Con's rebuttal that Pro's evidence is flawed/outdated plus emphasis on unsustainable costs are directly cited. A single clear winner (Con) is explicitly named, satisfying the requirement for a definitive decision. The justification logically follows from the content—Pro's closing indeed lacks specific data despite claiming 'facts speak for themselves,' and Con's closing does invoke the burden of proof and a fiscally responsible counterproposal, both accurately referenced. The reasoning stays consistent with the arguments' actual content, doesn't fabricate points, and addresses key elements from both sides. Minor deduction only because the output infers 'strategic' framing not explicitly stated as strategy in Con's text, though it's a reasonable interpretation rather than a distortion.
+PASSED
+tests/deepeval_promptfoo/deepeval/test_debate_deepeval.py::test_debate_rubric[one-word-relevance] 
+--
+[one-word] relevance: score=1.00 (threshold=0.7)
+reason: The output clearly and consistently advocates for pineapple, presenting a structured Pro argument with headers covering nutrition, culinary versatility, economic value, sensory appeal, and practical advantages. It stays entirely on-topic without drifting into unrelated subjects, and even preemptively counters detractors (e.g., pineapple pizza) while maintaining a Pro stance. The response is substantive, coherent, and well-organized, ending with a clear pro-pineapple conclusion. No degenerate or off-topic content is present, fully satisfying all four evaluation criteria.
+PASSED
+tests/deepeval_promptfoo/deepeval/test_debate_deepeval.py::test_debate_rubric[one-word-rebuttal_engagement] 
+--
+[one-word] rebuttal_engagement: score=0.90 (threshold=0.7)
+reason: The rebuttal directly engages with multiple specific claims from Pro's argument. It quotes Pro's exact phrase about "thick skin provides natural protection" and counters with the peeling waste issue. It names and challenges the bromelain digestive benefit claim, the vitamin C/acidity tradeoff, the pizza culinary innovation claim (explicitly referencing Pro's wording), and the economic value argument (contrasting with bananas). Each point is paired with a counter-argument or logical challenge, satisfying the direct engagement markers required. This is not a generic anti-pineapple speech but a structured rebuttal tied point-by-point to Pro's original claims, warranting a high score.
+PASSED
+tests/deepeval_promptfoo/deepeval/test_debate_deepeval.py::test_debate_rubric[one-word-moderator_soundness] 
+--
+[one-word] moderator_soundness: score=0.90 (threshold=0.7)
+reason: The moderator's decision clearly names Con as the sole winner, satisfying the requirement for an unambiguous verdict. The justification directly engages with both closings: it references Pro's claims of 'tangible benefits' and 'realistic solutions' as vague and unsubstantiated, and contrasts this with Con's specific points on costs, implementation challenges, and burden of proof. The reasoning logically follows from the input—Con's closing indeed emphasizes cost/implementation issues and burden of proof, while Pro's closing does rely on general assertions without specific evidence. The decision is well-grounded in the substance of both arguments rather than arbitrary, though it could have acknowledged Pro's rebuttal claims more critically before dismissing them. Overall the response aligns strongly with the evaluation criteria.
+PASSED
+tests/deepeval_promptfoo/deepeval/test_debate_deepeval.py::test_debate_rubric[winner-trap-relevance] 
+--
+[winner-trap] relevance: score=1.00 (threshold=0.7)
+reason: The output clearly argues FOR the topic 'Pro athletes are overpaid' with explicit stance and title. It presents coherent, well-structured arguments (market distortion, entertainment vs essential work, short career justification, opportunity costs, unsustainability) all directly relevant to the topic without drifting into unrelated subjects. The content is substantive, non-degenerate, and consistently supports the pro-topic stance throughout.
+PASSED
+tests/deepeval_promptfoo/deepeval/test_debate_deepeval.py::test_debate_rubric[winner-trap-rebuttal_engagement] 
+--
+[winner-trap] rebuttal_engagement: score=0.80 (threshold=0.7)
+reason: The Con rebuttal directly engages with three specific Pro claims: (1) it quotes and counters the $50M vs $65K teacher salary comparison by distinguishing consumer spending from taxpayer funding, (2) it explicitly quotes Pro's line 'the revenue argument merely describes how money flows, not whether it should' and rebuts it by asserting market value reflects societal demand, and (3) it addresses the 'opportunity cost' argument by pointing out the speculative assumption that capped salaries would redirect to education rather than owner profits. Each rebuttal point ties back to Pro's specific language and logic rather than offering generic anti-topic statements. However, the rebuttal ignores several other Pro arguments (short careers, pandemic essential worker comparison, ticket price inequality, youth sports exclusivity), leaving parts of Pro's case unaddressed. Still, the response demonstrates strong, direct, and specific engagement with multiple explicit Pro claims, meeting the criteria for high alignment with the evaluation steps.
+PASSED
+tests/deepeval_promptfoo/deepeval/test_debate_deepeval.py::test_debate_rubric[winner-trap-moderator_soundness] 
+--
+[winner-trap] moderator_soundness: score=0.80 (threshold=0.7)
+reason: The decision clearly names Pro as the winner, satisfying the requirement for a definitive verdict. The reasoning is grounded in points actually raised in the closings: Pro's empirical/comparable-context evidence and cost-effectiveness claims, and Con's fiscal sustainability and lack-of-proven-models objections are accurately referenced without fabrication. The rationale logically follows from the relative strength of arguments—Pro offered concrete claims of measurable success while Con offered objections without alternative solutions or counterdata, which is a reasonable distinction. The moderator also acknowledges Con's strongest points (fiscal burden, real-world complications) rather than ignoring them, and notes the win is 'not decisive,' showing balanced acknowledgment of the losing side's merits rather than contradicting them. Minor weakness: the moderator does not explicitly explain why unaddressed alternative solutions should tip the balance in Pro's favor over Con's substantive risk-based objections, leaving the logical link slightly underdeveloped, but overall the decision is coherent, well-supported, and clearly justified based on the closings provided.
+PASSEDRunning teardown with pytest sessionfinish...
+

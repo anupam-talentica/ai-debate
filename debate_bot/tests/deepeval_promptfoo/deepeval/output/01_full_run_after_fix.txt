@@ -1,0 +1,33 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.14.5, pytest-9.1.1, pluggy-1.6.0 -- /Users/anupamg/Desktop/Assignment/.debatenv/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/anupamg/Desktop/Assignment/debate_bot
+configfile: pytest.ini
+plugins: deepeval-4.1.1, anyio-4.14.0, rerunfailures-16.4, mock-3.15.1, repeat-0.9.4, xdist-3.8.0, asyncio-1.4.0, langsmith-0.9.1
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 9 items
+
+tests/deepeval_promptfoo/deepeval/test_debate_deepeval.py::test_debate_rubric[ai-jobs-relevance] PASSED [ 11%]
+tests/deepeval_promptfoo/deepeval/test_debate_deepeval.py::test_debate_rubric[ai-jobs-rebuttal_engagement] PASSED [ 22%]
+tests/deepeval_promptfoo/deepeval/test_debate_deepeval.py::test_debate_rubric[ai-jobs-moderator_soundness] PASSED [ 33%]
+tests/deepeval_promptfoo/deepeval/test_debate_deepeval.py::test_debate_rubric[one-word-relevance] PASSED [ 44%]
+tests/deepeval_promptfoo/deepeval/test_debate_deepeval.py::test_debate_rubric[one-word-rebuttal_engagement] PASSED [ 55%]
+tests/deepeval_promptfoo/deepeval/test_debate_deepeval.py::test_debate_rubric[one-word-moderator_soundness] PASSED [ 66%]
+tests/deepeval_promptfoo/deepeval/test_debate_deepeval.py::test_debate_rubric[winner-trap-relevance] PASSED [ 77%]
+tests/deepeval_promptfoo/deepeval/test_debate_deepeval.py::test_debate_rubric[winner-trap-rebuttal_engagement] PASSED [ 88%]
+tests/deepeval_promptfoo/deepeval/test_debate_deepeval.py::test_debate_rubric[winner-trap-moderator_soundness] PASSED [100%]Running teardown with pytest sessionfinish...
+
+
+=============================== warnings summary ===============================
+tests/deepeval_promptfoo/deepeval/metrics.py:20
+tests/deepeval_promptfoo/deepeval/metrics.py:20
+  /Users/anupamg/Desktop/Assignment/debate_bot/tests/deepeval_promptfoo/deepeval/metrics.py:20: DeprecationWarning: 'LLMTestCaseParams' is deprecated and will be removed in a future release. Use 'SingleTurnParams' instead.
+    from deepeval.test_case import LLMTestCase, LLMTestCaseParams
+
+../.debatenv/lib/python3.14/site-packages/deepeval/tracing/tracing.py:1463
+../.debatenv/lib/python3.14/site-packages/deepeval/tracing/tracing.py:1463
+  /Users/anupamg/Desktop/Assignment/.debatenv/lib/python3.14/site-packages/deepeval/tracing/tracing.py:1463: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    if asyncio.iscoroutinefunction(func):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================== 9 passed, 4 warnings in 170.87s (0:02:50) ===================

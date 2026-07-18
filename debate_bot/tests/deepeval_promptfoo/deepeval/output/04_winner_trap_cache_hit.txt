@@ -1,0 +1,12 @@
+$ python -m pytest tests/deepeval_promptfoo/deepeval/test_debate_deepeval.py -v -m eval -k winner-trap
+(rerun immediately after 03_winner_trap_cache_miss.txt, cache file already present)
+
+================= 3 passed, 6 deselected, 4 warnings in 28.32s =================
+
+Notes:
+- EVAL_CACHE_DEBATES=true (default). Cache hit on tests/deepeval_promptfoo/
+  .debate_cache/30893746daef3c17.json — debate generation skipped entirely,
+  only the 3 judge-scoring calls ran.
+- Cache file mtime unchanged before/after this run (Jul 17 06:44:25 2026),
+  confirming it was read, not rewritten.
+- Runtime dropped from 65.14s (cache miss) to 28.32s (cache hit).

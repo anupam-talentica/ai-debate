@@ -63,7 +63,7 @@ async def test_con_opening_memory_upsert_fails(base_state, mock_llm):
 @pytest.mark.asyncio
 async def test_graph_execution_with_invalid_state():
     """Graph should handle invalid state transitions."""
-    from app import src.core.graph as graph
+    from app import graph
     from src.core.state import DebateState
 
     invalid_state: DebateState = {

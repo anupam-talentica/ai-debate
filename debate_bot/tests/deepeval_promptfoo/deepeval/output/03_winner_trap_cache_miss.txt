@@ -1,0 +1,18 @@
+$ rm -rf tests/deepeval_promptfoo/.debate_cache
+$ python -m pytest tests/deepeval_promptfoo/deepeval/test_debate_deepeval.py -v -m eval -k winner-trap
+
+collecting ... collected 9 items / 6 deselected / 3 selected
+
+tests/deepeval_promptfoo/deepeval/test_debate_deepeval.py::test_debate_rubric[winner-trap-relevance] PASSED [ 33%]
+tests/deepeval_promptfoo/deepeval/test_debate_deepeval.py::test_debate_rubric[winner-trap-rebuttal_engagement] PASSED [ 66%]
+tests/deepeval_promptfoo/deepeval/test_debate_deepeval.py::test_debate_rubric[winner-trap-moderator_soundness] PASSED [100%]
+Running teardown with pytest sessionfinish...
+
+============ 3 passed, 6 deselected, 4 warnings in 65.14s (0:01:05) ============
+
+Notes:
+- Cache dir emptied before this run — EVAL_CACHE_DEBATES=true (default) so a
+  miss triggers a live debate generation, which is then written to
+  tests/deepeval_promptfoo/.debate_cache/<hash>.json.
+- Cache file created: 30893746daef3c17.json (topic="Pro athletes are overpaid",
+  winner="Con").

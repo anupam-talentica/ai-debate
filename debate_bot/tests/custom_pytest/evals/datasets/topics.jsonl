@@ -1,0 +1,15 @@
+{"id": "ai-jobs", "topic": "AI will replace software engineers", "expects_winner_parse": true, "note": "baseline well-formed topic"}
+{"id": "one-word", "topic": "Pineapple", "note": "degenerate/short topic — stresses relevance"}
+{"id": "winner-trap", "topic": "Pro athletes are overpaid", "note": "topic contains 'Pro' substring — stresses the brittle winner parser (moderator.py:40-53)"}
+{"id": "con-trap", "topic": "Con artists deserve harsher sentences", "note": "topic contains 'Con' substring — stresses the fallback winner scan"}
+{"id": "closing-ref", "topic": "Remote work beats office work", "note": "a good closing must reference the opening (closings get no transcript)"}
+{"id": "opening-decisive", "topic": "Nuclear power is the safest path to decarbonization", "note": "decisive point lives in openings — moderator only sees closings"}
+{"id": "rebuttal-chain", "topic": "Social media does more harm than good", "note": "rebuttal chain matters — con rebuts pro's opening, not pro's rebuttal"}
+{"id": "ubi", "topic": "Universal basic income should be implemented"}
+{"id": "four-day-week", "topic": "The four-day work week should be standard"}
+{"id": "space-exploration", "topic": "Public money should fund space exploration"}
+{"id": "self-driving", "topic": "Self-driving cars will make roads safer"}
+{"id": "homework", "topic": "Homework should be abolished in primary schools"}
+{"id": "crypto", "topic": "Cryptocurrency is a net positive for society"}
+{"id": "gene-editing", "topic": "Human gene editing should be legal"}
+{"id": "standardized-tests", "topic": "Standardized testing should be eliminated from college admissions"}

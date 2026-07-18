@@ -1,0 +1,82 @@
+{
+  "summary": {
+    "n_topics": 3,
+    "pass_rates": {
+      "winner_valid": 0.0,
+      "all_fields": 1.0,
+      "opening_wc_ok": 1.0,
+      "rebuttal_wc_ok": 0.333,
+      "closing_wc_ok": 1.0,
+      "mod_3part": 1.0
+    },
+    "means": {
+      "relevance": 5.0,
+      "persuasiveness": 4.0,
+      "rebuttal_engagement": 4.0,
+      "moderator_soundness": 1.0
+    },
+    "judge_success_rate": 1.0
+  },
+  "rows": [
+    {
+      "id": "ai-jobs",
+      "topic": "AI will replace software engineers",
+      "note": "baseline well-formed topic",
+      "winner_valid": false,
+      "all_fields": true,
+      "opening_wc_ok": true,
+      "rebuttal_wc_ok": false,
+      "closing_wc_ok": true,
+      "mod_3part": true,
+      "pro_opening_wc": 215,
+      "pro_rebuttal_wc": 137,
+      "pro_closing_wc": 68,
+      "winner": "Con**",
+      "judge_ok": true,
+      "relevance": 5,
+      "persuasiveness": 4,
+      "rebuttal_engagement": 4,
+      "moderator_soundness": 1
+    },
+    {
+      "id": "one-word",
+      "topic": "Pineapple",
+      "note": "degenerate/short topic — stresses relevance",
+      "winner_valid": false,
+      "all_fields": true,
+      "opening_wc_ok": true,
+      "rebuttal_wc_ok": true,
+      "closing_wc_ok": true,
+      "mod_3part": true,
+      "pro_opening_wc": 206,
+      "pro_rebuttal_wc": 112,
+      "pro_closing_wc": 77,
+      "winner": "Con**",
+      "judge_ok": true,
+      "relevance": 5,
+      "persuasiveness": 4,
+      "rebuttal_engagement": 4,
+      "moderator_soundness": 1
+    },
+    {
+      "id": "winner-trap",
+      "topic": "Pro athletes are overpaid",
+      "note": "topic contains 'Pro' substring — stresses the brittle winner parser (moderator.py:40-53)",
+      "winner_valid": false,
+      "all_fields": true,
+      "opening_wc_ok": true,
+      "rebuttal_wc_ok": false,
+      "closing_wc_ok": true,
+      "mod_3part": true,
+      "pro_opening_wc": 211,
+      "pro_rebuttal_wc": 131,
+      "pro_closing_wc": 77,
+      "winner": "Pro**",
+      "judge_ok": true,
+      "relevance": 5,
+      "persuasiveness": 4,
+      "rebuttal_engagement": 4,
+      "moderator_soundness": 1
+    }
+  ]
+}

@@ -133,7 +133,7 @@ async def test_debate_with_null_values_in_state(base_state):
     base_state["pro_opening"] = None
     base_state["con_opening"] = None
     # Should handle None gracefully
-    from app import src.core.graph as graph
+    from app import graph
     # This might fail validation, which is expected
 
 

@@ -1,0 +1,52 @@
+# promptfoo config (Option C2) — declarative debate eval with a Claude grader.
+#
+#   cd debate_bot/tests/deepeval_promptfoo/promptfoo
+#   export ANTHROPIC_API_KEY=...
+#   npx promptfoo@latest eval        # then: npx promptfoo@latest view  (local HTML report)
+#
+# The system-under-test is our Python provider (runs a real debate). The
+# llm-rubric grader is pointed at a Claude model so scoring uses Sonnet, not
+# promptfoo's default OpenAI grader.
+description: Multi-agent debate eval (Approach C — promptfoo)
+
+providers:
+  - id: python:eval_provider.py
+    label: run_debate
+
+# defaultTest applies to every test row below:
+#   - options.provider  → grade llm-rubric asserts with Claude (not OpenAI)
+#   - assert            → the shared rubric + deterministic checks
+defaultTest:
+  options:
+    provider:
+      id: anthropic:messages:claude-sonnet-5
+  assert:
+    # --- debate-specific rubrics, one per dimension (transform focuses the field) ---
+    - type: llm-rubric
+      transform: JSON.parse(output).pro_opening
+      value: "The text argues FOR the debate topic and stays on-topic (relevance)."
+    - type: llm-rubric
+      transform: >-
+        'Pro opening: ' + JSON.parse(output).pro_opening +
+        '\n\nCon rebuttal: ' + JSON.parse(output).con_rebuttal
+      value: "The Con rebuttal directly engages at least one specific point Pro made (rebuttal engagement)."
+    - type: llm-rubric
+      transform: >-
+        'Closings: ' + JSON.parse(output).pro_closing + ' | ' + JSON.parse(output).con_closing +
+        '\n\nModerator: ' + JSON.parse(output).moderator_summary
+      value: "The moderator decision is justified by the closing arguments and names a clear winner (moderator soundness)."
+    # --- deterministic checks, identical intent to Approach A (comparability) ---
+    - type: javascript
+      value: "['Pro','Con'].includes(JSON.parse(output).winner)" # winner_valid
+    - type: javascript
+      value: "JSON.parse(output).pro_opening.split(/\\s+/).length <= 250" # opening word cap
+    - type: javascript
+      value: "JSON.parse(output).pro_closing.split(/\\s+/).length <= 100" # closing word cap
+
+# Topics mirror a slice of the shared dataset
+# (../../custom_pytest/evals/datasets/topics.jsonl). Includes the winner-parser
+# trap topic so the eval has teeth, matching Approach A.
+tests:
+  - vars: { topic: "AI will replace software engineers" }
+  - vars: { topic: "Pro athletes are overpaid" } # 'Pro' substring — winner-parser trap
+  - vars: { topic: "Social media does more harm than good" }
