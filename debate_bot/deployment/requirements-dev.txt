@@ -1,0 +1,4 @@
+# UI-only deps for the T5 failover demo (deployment/ui/streamlit_app.py).
+# Not part of the debate-node image — the UI runs on the host, not in a container.
+streamlit>=1.38
+httpx>=0.24

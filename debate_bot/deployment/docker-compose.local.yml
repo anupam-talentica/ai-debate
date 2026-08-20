@@ -1,0 +1,148 @@
+version: '3.9'
+
+# Multi-node local infra for the failover demo (T4). Run from debate_bot/:
+#   docker compose -f deployment/docker-compose.local.yml up --build
+#
+# Three fixed debate-node services (not `--scale`) so each has an inspectable,
+# stable NODE_ID/container name — `docker kill debate-node-2` during the demo
+# is easier to reason about live than picking a scaled instance by container ID.
+
+x-debate-node: &debate-node
+  build:
+    context: ..
+    dockerfile: Dockerfile
+  # Resolved relative to this compose file's directory, so this picks up
+  # debate_bot/.env for ANTHROPIC_API_KEY/MODEL_NAME regardless of which
+  # directory `docker compose -f deployment/docker-compose.local.yml` is
+  # invoked from — compose's own ${VAR} substitution would otherwise look
+  # for a .env next to *this* file, not the one at the project root.
+  env_file:
+    - ../.env
+  environment:
+    - PYTHONUNBUFFERED=1
+    - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/debate_bot
+    - REDIS_URL=redis://redis:6379
+  command: python -m uvicorn server:app --host 0.0.0.0 --port 8000
+  healthcheck:
+    test: ["CMD", "curl", "-f", "http://localhost:8000/debate/health"]
+    interval: 10s
+    timeout: 5s
+    retries: 5
+    start_period: 15s
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+  networks:
+    - debate-network
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: debate-postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=debate_bot
+    ports:
+      - "5432:5432"
+    volumes:
+      - debate-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - debate-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: debate-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - debate-network
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: debate-redisinsight
+    ports:
+      - "5540:5540"
+    volumes:
+      - debate-redisinsight-data:/data
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - debate-network
+
+  debate-node-1:
+    <<: *debate-node
+    container_name: debate-node-1
+    hostname: node-1
+    # Published to the host so the Streamlit UI (T5) can poll each node's
+    # /debate/health directly, bypassing the LB — that's the point of the
+    # per-node status row (it must reflect a killed node, not the LB's view).
+    ports:
+      - "8001:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/debate_bot
+      - REDIS_URL=redis://redis:6379
+      - NODE_ID=node-1
+
+  debate-node-2:
+    <<: *debate-node
+    container_name: debate-node-2
+    hostname: node-2
+    ports:
+      - "8002:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/debate_bot
+      - REDIS_URL=redis://redis:6379
+      - NODE_ID=node-2
+
+  debate-node-3:
+    <<: *debate-node
+    container_name: debate-node-3
+    hostname: node-3
+    ports:
+      - "8003:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/debate_bot
+      - REDIS_URL=redis://redis:6379
+      - NODE_ID=node-3
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: debate-nginx
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      debate-node-1:
+        condition: service_healthy
+      debate-node-2:
+        condition: service_healthy
+      debate-node-3:
+        condition: service_healthy
+    networks:
+      - debate-network
+
+networks:
+  debate-network:
+    driver: bridge
+
+volumes:
+  debate-postgres-data:
+  debate-redisinsight-data:

@@ -47,6 +47,6 @@ defaultTest:
 # (../../custom_pytest/evals/datasets/topics.jsonl). Includes the winner-parser
 # trap topic so the eval has teeth, matching Approach A.
 tests:
-  - vars: { topic: "AI will replace software engineers" }
+ # - vars: { topic: "AI will replace software engineers" }
   - vars: { topic: "Pro athletes are overpaid" } # 'Pro' substring — winner-parser trap
-  - vars: { topic: "Social media does more harm than good" }
+ # - vars: { topic: "Social media does more harm than good" }

@@ -55,7 +55,7 @@ def test_debate_stream_endpoint():
         timeout=120.0,
     )
     assert response.status_code == 200
-    assert response.headers["content-type"] == "text/event-stream"
+    assert response.headers["content-type"].startswith("text/event-stream")
 
     # Verify at least some events were streamed
     events = []

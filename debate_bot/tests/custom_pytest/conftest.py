@@ -1,3 +1,12 @@
+import os
+
+# Force off before anything imports app.py / src.core.graph — that import wires
+# MOCK_LLM (see src/core/graph.py) into the graph once, at import time, from
+# whatever's in the developer's local .env. Tests must be deterministic
+# regardless of that local UI-testing toggle, so pin it here first; dotenv's
+# load_dotenv() (override=False by default) won't clobber this later.
+os.environ["MOCK_LLM"] = "false"
+
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 

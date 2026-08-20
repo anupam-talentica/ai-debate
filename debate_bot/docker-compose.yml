@@ -1,6 +1,51 @@
 version: '3.9'
 
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: debate-bot-postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=debate_bot
+    ports:
+      - "5432:5432"
+    volumes:
+      - debate-bot-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - debate-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: debate-bot-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - debate-network
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: debate-bot-redisinsight
+    ports:
+      - "5540:5540"
+    volumes:
+      - debate-bot-redisinsight-data:/data
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - debate-network
+
   debate-bot:
     build:
       context: .
@@ -13,6 +58,13 @@ services:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - LANGSMITH_API_KEY=${LANGSMITH_API_KEY:-}
       - LANGCHAIN_TRACING_V2=${LANGCHAIN_TRACING_V2:-false}
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/debate_bot
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
       # Mount source code for development
       - .:/app
@@ -32,3 +84,7 @@ services:
 networks:
   debate-network:
     driver: bridge
+
+volumes:
+  debate-bot-postgres-data:
+  debate-bot-redisinsight-data:

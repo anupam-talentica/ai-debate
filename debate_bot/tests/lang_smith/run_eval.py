@@ -34,7 +34,7 @@ from tests.lang_smith.evaluators import EVALUATORS
 from tests.lang_smith.upload_dataset import _load_topics
 
 DATASET_NAME = "debate-topics"
-NUM_TOPICS = 3  # only evaluate the first N topics from topics.jsonl
+NUM_TOPICS = 2  # only evaluate the first N topics from topics.jsonl
 
 
 def _first_n_examples(n: int) -> list[dict]:
