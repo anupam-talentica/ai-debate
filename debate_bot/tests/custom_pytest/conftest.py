@@ -42,4 +42,7 @@ def base_state():
         "moderator_summary": "",
         "winner": "",
         "memory_context": [],
+        "audience_question": "",
+        "pro_audience_answer": "",
+        "con_audience_answer": "",
     }

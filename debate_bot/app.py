@@ -36,7 +36,7 @@ async def close_checkpointer() -> None:
         await _checkpointer_cm.__aexit__(None, None, None)
 
 
-async def run_debate(topic: str, run_id: str | None = None) -> dict:
+async def run_debate(topic: str, run_id: str | None = None, audience_question: str = "") -> dict:
     """Run a full debate and return the final state."""
     run_id = run_id or str(uuid.uuid4())
     initial_state = {
@@ -51,6 +51,9 @@ async def run_debate(topic: str, run_id: str | None = None) -> dict:
         "moderator_summary": "",
         "winner": "",
         "memory_context": [],
+        "audience_question": audience_question,
+        "pro_audience_answer": "",
+        "con_audience_answer": "",
     }
     config = {"configurable": {"thread_id": run_id}}
     final_state = await graph.ainvoke(initial_state, config=config)

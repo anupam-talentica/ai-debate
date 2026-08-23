@@ -51,6 +51,24 @@ Pro's opening argument:
 {memory_block}
 """
 
+PRO_AUDIENCE_RESPONSE = """\
+You are the Pro debater. An audience member has asked the following question. Answer it directly in approximately 100 words, while reinforcing your position. Do not exceed 130 words.
+
+Audience question:
+{audience_question}
+
+{memory_block}
+"""
+
+CON_AUDIENCE_RESPONSE = """\
+You are the Con debater. An audience member has asked the following question. Answer it directly in approximately 100 words, while reinforcing your position. Do not exceed 130 words.
+
+Audience question:
+{audience_question}
+
+{memory_block}
+"""
+
 PRO_CLOSING = """\
 You are the Pro debater. Deliver a closing statement in approximately 75 words.
 Reinforce your strongest points. Do not exceed 100 words.
@@ -72,6 +90,14 @@ Write approximately 150 words. Structure your response as:
 2. One-sentence summary of Con's strongest point.
 3. Winner declaration with a one-paragraph justification.
 
+Weigh not only the closing statements but also, if present, how well each
+side handled the audience question below — a strong live answer counts in
+a debater's favor, a weak or evasive one counts against them.
+
 Pro closing: {pro_closing}
 Con closing: {con_closing}
+
+Audience question: {audience_question}
+Pro's answer: {pro_audience_answer}
+Con's answer: {con_audience_answer}
 """

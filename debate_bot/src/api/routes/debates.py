@@ -7,9 +7,16 @@ from fastapi.responses import StreamingResponse
 
 import app as debate_app
 from deployment.app_ext import event_bus, ownership
-from src.api.schemas import DebateRequest, DebateResponse, DebateStartResponse, HealthResponse
+from src.api.schemas import (
+    AudienceQuestionRequest,
+    DebateRequest,
+    DebateResponse,
+    DebateStartResponse,
+    HealthResponse,
+)
 from src.api.services.debate_service import DebateService
 from src.api.services.exceptions import (
+    DebateAwaitingInputError,
     DebateExecutionError,
     DebateTimeoutError,
 )
@@ -48,12 +55,16 @@ async def debate_invoke(request: DebateRequest) -> dict:
     logger.info(f"Debate invoked: {request.topic[:50]}...")
 
     try:
-        result = await debate_service.execute_debate(request.topic)
+        result = await debate_service.execute_debate(request.topic, audience_question=request.audience_question)
         return DebateResponse(**result)
 
     except DebateTimeoutError as e:
         logger.warning(f"Debate timeout: {str(e)}")
         raise HTTPException(status_code=408, detail=str(e))
+
+    except DebateAwaitingInputError as e:
+        logger.warning(f"Debate awaiting audience question: {str(e)}")
+        raise HTTPException(status_code=409, detail={"message": str(e), "run_id": e.run_id})
 
     except DebateExecutionError as e:
         logger.error(f"Debate execution error: {str(e)}")
@@ -124,6 +135,46 @@ async def debate_start(request: DebateRequest) -> dict:
     asyncio.create_task(debate_service.run_and_publish(run_id, debate_app.NODE_ID, topic=request.topic))
 
     return {"run_id": run_id}
+
+
+@router.post("/{run_id}/audience-question", tags=["Debate"])
+async def submit_audience_question(run_id: str, request: AudienceQuestionRequest) -> dict:
+    """
+    Submit the single audience question for a debate paused after its rebuttal
+    round, resuming its execution in the background.
+
+    Args:
+        run_id: The paused run's id, as returned by `POST /debate/start`
+        request: AudienceQuestionRequest containing the question text
+
+    Returns:
+        Acknowledgement that the question was accepted and the run is resuming
+
+    Raises:
+        HTTPException: 404 if run_id is unknown, 409 if the run isn't
+            currently awaiting a question (already answered, still running,
+            or already done)
+    """
+    status = await ownership.get_status(run_id)
+    if status is None:
+        raise HTTPException(status_code=404, detail=f"No run found for run_id={run_id}")
+    if status != "waiting_for_input":
+        raise HTTPException(
+            status_code=409,
+            detail=f"Run {run_id} is not awaiting an audience question (status={status})",
+        )
+
+    claimed = await ownership.claim(run_id, debate_app.NODE_ID)
+    if not claimed:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Run {run_id}'s audience question was already claimed by another request",
+        )
+
+    logger.info(f"Audience question submitted for [{run_id}] on {debate_app.NODE_ID}: {request.question[:50]}...")
+    asyncio.create_task(debate_service.resume_with_answer(run_id, debate_app.NODE_ID, request.question))
+
+    return {"run_id": run_id, "status": "resuming"}
 
 
 # How often a relaying-only node re-checks whether the owner it's relaying

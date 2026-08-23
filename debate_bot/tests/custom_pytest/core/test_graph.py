@@ -35,10 +35,17 @@ async def test_full_graph_runs_to_completion():
             "moderator_summary": "",
             "winner": "",
             "memory_context": [],
+            # Pre-supplied so the audience-question pause is skipped and the
+            # graph runs start-to-finish in this single ainvoke() call.
+            "audience_question": "What about the environmental impact?",
+            "pro_audience_answer": "",
+            "con_audience_answer": "",
         })
 
     assert state["pro_opening"] != ""
     assert state["con_opening"] != ""
+    assert state["pro_audience_answer"] != ""
+    assert state["con_audience_answer"] != ""
     assert state["moderator_summary"] != ""
     assert "memory_context" in state
 
@@ -75,6 +82,9 @@ async def test_graph_includes_memory_context():
             "moderator_summary": "",
             "winner": "",
             "memory_context": [],
+            "audience_question": "",
+            "pro_audience_answer": "",
+            "con_audience_answer": "",
         })
 
     assert "memory_context" in state

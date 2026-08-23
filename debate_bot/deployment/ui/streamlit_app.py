@@ -39,13 +39,18 @@ TYPEWRITER_DELAY_SECONDS = 0.03  # per-word delay when a turn's text is first re
 
 # Mirrors the edges in src/core/graph.py: each round is Pro then Con, and a
 # moderator_checkpoint event between them announces what's coming next.
+# Third element is the state key holding the turn's text — matches the node
+# name for every node except the two audience-question responders, whose
+# node functions return `pro_audience_answer`/`con_audience_answer` instead.
 SPEAKERS = {
-    "pro_opening": ("pro", "Pro Opening"),
-    "con_opening": ("con", "Con Opening"),
-    "pro_rebuttal": ("pro", "Pro Rebuttal"),
-    "con_rebuttal": ("con", "Con Rebuttal"),
-    "pro_closing": ("pro", "Pro Closing"),
-    "con_closing": ("con", "Con Closing"),
+    "pro_opening": ("pro", "Pro Opening", "pro_opening"),
+    "con_opening": ("con", "Con Opening", "con_opening"),
+    "pro_rebuttal": ("pro", "Pro Rebuttal", "pro_rebuttal"),
+    "con_rebuttal": ("con", "Con Rebuttal", "con_rebuttal"),
+    "pro_addresses_question": ("pro", "Pro Answers the Audience", "pro_audience_answer"),
+    "con_addresses_question": ("con", "Con Answers the Audience", "con_audience_answer"),
+    "pro_closing": ("pro", "Pro Closing", "pro_closing"),
+    "con_closing": ("con", "Con Closing", "con_closing"),
 }
 ROUND_DIVIDER = {
     "rebuttal": "Moderator initiated Rebuttal Round",
@@ -56,6 +61,7 @@ ROLE_STYLE = {
     "pro": {"color": "#7c3aed", "label": "PRO"},
     "con": {"color": "#dc2626", "label": "CON"},
     "mod": {"color": "#2563eb", "label": "MOD"},
+    "audience": {"color": "#059669", "label": "❓"},
 }
 
 st.set_page_config(page_title="Debate Bot — Failover Demo", page_icon="🗣️", layout="wide")
@@ -164,11 +170,24 @@ def start_debate(topic: str) -> None:
         "events": [],
         "event_queue": event_q,
         "done": False,
+        "question_submitted": False,
     }
     st.session_state.debate_order.append(run_id)
     st.session_state.active_run_id = run_id
 
     threading.Thread(target=consume_stream, args=(run_id, event_q), daemon=True).start()
+
+
+def submit_audience_question(run_id: str, question: str) -> None:
+    """POST the audience's question for a paused debate — any node behind the
+    LB can claim and resume it; the resulting events reach this same SSE
+    connection via Redis pub/sub regardless of which node claims it."""
+    resp = httpx.post(
+        f"{LB_URL}/debate/{run_id}/audience-question",
+        json={"question": question},
+        timeout=10.0,
+    )
+    resp.raise_for_status()
 
 
 def drain_all_queues() -> None:
@@ -236,7 +255,33 @@ def render_message(role: str, text: str, node_id: str | None, animate: bool) -> 
             st.caption(f"served by `{node_id}`")
 
 
-def render_transcript(events: list, done: bool) -> None:
+def render_audience_question_form(run_id: str, debate: dict) -> None:
+    """Rendered only while the debate is sitting on the audience-question
+    pause (the last event received is still AWAITING_AUDIENCE_QUESTION) and
+    this browser session hasn't already submitted one — the spec allows
+    exactly one question per debate, and the resume events take a moment to
+    arrive over SSE after submitting, so a local flag prevents a double POST
+    from a rerun in that gap."""
+    if debate.get("question_submitted"):
+        st.info("⏳ Waiting for the debate to resume with your question...")
+        return
+
+    with st.form(key=f"audience_question_form_{run_id}"):
+        question = st.text_input("Ask a question for both debaters to address")
+        submitted = st.form_submit_button("Submit Question")
+    if submitted and question.strip():
+        try:
+            submit_audience_question(run_id, question.strip())
+            debate["question_submitted"] = True
+            st.rerun()
+        except httpx.HTTPError as e:
+            st.error(f"Failed to submit question: {e}")
+
+
+def render_transcript(run_id: str, debate: dict) -> None:
+    events = debate["events"]
+    done = debate["done"]
+
     for event in events:
         node = event.get("node")
         state = event.get("state") or {}
@@ -255,10 +300,24 @@ def render_transcript(events: list, done: bool) -> None:
         elif node == "moderator_checkpoint":
             render_divider(ROUND_DIVIDER.get(state.get("round"), "Moderator checkpoint"))
         elif node in SPEAKERS:
-            role, label = SPEAKERS[node]
+            role, label, state_key = SPEAKERS[node]
             render_divider(label)
-            render_message(role, state.get(node, ""), node_id, animate)
+            render_message(role, state.get(state_key, ""), node_id, animate)
             event["_shown"] = True
+        elif node == "AWAITING_AUDIENCE_QUESTION":
+            render_divider("Moderator invites an audience question")
+        elif node == "audience_question":
+            # Resuming re-runs this node (LangGraph re-executes a node from
+            # its start on resume) - this time interrupt() returns the
+            # submitted answer immediately instead of pausing again, so the
+            # question now shows up as a normal completed-node update.
+            question_text = state.get("audience_question", "")
+            if question_text:
+                render_divider("Audience Question")
+                render_message("audience", question_text, node_id, animate)
+                event["_shown"] = True
+        elif node == "AWAITING_AUDIENCE_QUESTION_UNSUPPORTED":
+            st.error(f"⚠️ {event.get('detail', 'This debate paused and cannot resume here.')}")
         elif node == "moderator_decision":
             render_message("mod", state.get("moderator_summary", ""), node_id, animate)
             event["_shown"] = True
@@ -270,9 +329,13 @@ def render_transcript(events: list, done: bool) -> None:
     if not done and events:
         last_node = events[-1].get("node")
         last_round = (events[-1].get("state") or {}).get("round")
-        if last_node in ("moderator_open",) or (last_node == "moderator_checkpoint" and last_round != "decision"):
+        if last_node == "AWAITING_AUDIENCE_QUESTION":
+            render_audience_question_form(run_id, debate)
+        elif last_node == "audience_question":
             render_speaker_pill("pro", "Pro")
-        elif last_node in ("pro_opening", "pro_rebuttal", "pro_closing"):
+        elif last_node in ("moderator_open",) or (last_node == "moderator_checkpoint" and last_round != "decision"):
+            render_speaker_pill("pro", "Pro")
+        elif last_node in ("pro_opening", "pro_rebuttal", "pro_addresses_question", "pro_closing"):
             render_speaker_pill("con", "Con")
         elif last_node == "moderator_checkpoint" and last_round == "decision":
             render_speaker_pill("mod", "Moderator")
@@ -344,7 +407,7 @@ def live_panel() -> None:
     if active_id and active_id in st.session_state.debates:
         debate = st.session_state.debates[active_id]
         st.caption(f"Run ID: `{active_id}`")
-        render_transcript(debate["events"], debate["done"])
+        render_transcript(active_id, debate)
     elif st.session_state.debates:
         st.info("Select a debate from the sidebar, or start a new one above.")
 

@@ -10,6 +10,9 @@ Wired in by src/core/graph.py, which imports these in place of the real
 src/agents/{pro,con,moderator}.py functions when MOCK_LLM is set. Only the
 LLM-calling nodes are replaced — moderator_open/moderator_checkpoint do no
 model call in the real implementation either, so they're always real.
+pro_addresses_question/con_addresses_question are also always real despite
+calling the LLM: the audience question is novel input each run, so there's
+no cached answer to replay.
 """
 
 import asyncio

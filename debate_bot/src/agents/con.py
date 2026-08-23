@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from langchain_anthropic import ChatAnthropic
 from src.core.state import DebateState
-from src.core.prompts import CON_OPENING, CON_REBUTTAL, CON_CLOSING, build_memory_block
+from src.core.prompts import CON_OPENING, CON_REBUTTAL, CON_AUDIENCE_RESPONSE, CON_CLOSING, build_memory_block
 from src.core.memory import retrieve_context
 
 load_dotenv()
@@ -34,6 +34,15 @@ async def con_rebuttal(state: DebateState) -> dict:
     async for chunk in llm.astream(prompt):
         chunks.append(chunk.content)
     return {"con_rebuttal": "".join(chunks)}
+
+
+async def con_addresses_question(state: DebateState) -> dict:
+    memory_block = build_memory_block(state["memory_context"])
+    prompt = CON_AUDIENCE_RESPONSE.format(audience_question=state["audience_question"], memory_block=memory_block)
+    chunks = []
+    async for chunk in llm.astream(prompt):
+        chunks.append(chunk.content)
+    return {"con_audience_answer": "".join(chunks)}
 
 
 async def con_closing(state: DebateState) -> dict:

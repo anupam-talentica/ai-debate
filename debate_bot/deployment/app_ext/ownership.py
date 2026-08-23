@@ -60,7 +60,15 @@ def _pool_or_raise() -> AsyncConnectionPool:
 
 
 async def claim(run_id: str, node_id: str) -> bool:
-    """Claim run_id for node_id if it's unowned or the owner's heartbeat is stale.
+    """Claim run_id for node_id if it's unowned, the owner's heartbeat is
+    stale, or the run is paused waiting for an audience question.
+
+    A 'waiting_for_input' row is claimable immediately regardless of how
+    fresh its heartbeat looks — nothing is heartbeating it once paused, so
+    staleness is meaningless there. This is the only path that should ever
+    reclaim such a row (the audience-question endpoint, once an answer
+    arrives) — the ordinary crash-recovery reclaim path never calls claim()
+    for one, since is_owned_and_alive() reports it permanently alive.
 
     Race-safe: when several nodes attempt this concurrently for the same
     run_id, Postgres's row-level locking on the UPDATE ensures exactly one
@@ -75,8 +83,9 @@ async def claim(run_id: str, node_id: str) -> bool:
             VALUES (%s, %s, now(), 'running')
             ON CONFLICT (run_id) DO UPDATE
               SET node_id = EXCLUDED.node_id, heartbeat_at = now(), status = 'running'
-              WHERE run_ownership.status != 'done'
-                AND run_ownership.heartbeat_at < now() - (%s * interval '1 second')
+              WHERE run_ownership.status = 'waiting_for_input'
+                 OR (run_ownership.status NOT IN ('done', 'waiting_for_input')
+                     AND run_ownership.heartbeat_at < now() - (%s * interval '1 second'))
             RETURNING node_id
             """,
             (run_id, node_id, STALE_AFTER_SECONDS),
@@ -110,8 +119,34 @@ async def set_status(run_id: str, node_id: str, status: str) -> None:
         )
 
 
+async def get_status(run_id: str) -> Optional[str]:
+    """Return run_id's current status, or None if no ownership row exists for it.
+
+    Used to give a clear rejection reason (unknown run, already answered,
+    still running, already done) before attempting to claim it — claim()
+    itself would otherwise happily INSERT a brand-new row for an unknown
+    run_id, which is the right behavior for /debate/start but wrong for a
+    question submitted against a run that was never started.
+    """
+    async with _pool_or_raise().connection() as conn:
+        cur = await conn.execute(
+            "SELECT status FROM run_ownership WHERE run_id = %s",
+            (run_id,),
+        )
+        row = await cur.fetchone()
+        return row[0] if row else None
+
+
 async def is_owned_and_alive(run_id: str) -> bool:
-    """True if run_id is owned by a node with a live heartbeat, or already done.
+    """True if run_id is owned by a node with a live heartbeat, or already done,
+    or paused waiting for an audience question.
+
+    'waiting_for_input' is treated as permanently alive the same way 'done' is:
+    a paused run has no active node to time out, and only the audience-question
+    endpoint (which claims and resumes it directly with the answer) should ever
+    move it forward — not the stale-heartbeat reclaim path used for crash
+    recovery, which would otherwise just re-trigger the same interrupt on a
+    ~STALE_AFTER_SECONDS cadence for as long as the human takes to respond.
 
     Used by the stream route to decide whether to relay only (owner is
     alive) or claim + execute (owner missing/stale).
@@ -121,7 +156,8 @@ async def is_owned_and_alive(run_id: str) -> bool:
             """
             SELECT 1 FROM run_ownership
             WHERE run_id = %s
-              AND (status = 'done' OR heartbeat_at >= now() - (%s * interval '1 second'))
+              AND (status IN ('done', 'waiting_for_input')
+                   OR heartbeat_at >= now() - (%s * interval '1 second'))
             """,
             (run_id, STALE_AFTER_SECONDS),
         )
