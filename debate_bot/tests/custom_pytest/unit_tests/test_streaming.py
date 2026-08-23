@@ -13,9 +13,9 @@ async def test_streaming_debate_receives_all_events():
 
     with patch("app.graph.astream") as mock_stream:
         events = [
-            ("moderator_open", {"round": "opening"}),
-            ("pro_opening", {"pro_opening": "Pro arg"}),
-            ("con_opening", {"con_opening": "Con arg"}),
+            {"moderator_open": {"round": "opening"}},
+            {"pro_opening": {"pro_opening": "Pro arg"}},
+            {"con_opening": {"con_opening": "Con arg"}},
         ]
 
         async def mock_generator():
@@ -26,7 +26,7 @@ async def test_streaming_debate_receives_all_events():
 
         response = client.get("/debate/stream?topic=test")
         assert response.status_code == 200
-        assert response.headers["content-type"] == "text/event-stream"
+        assert response.headers["content-type"].startswith("text/event-stream")
 
 
 @pytest.mark.asyncio
@@ -39,7 +39,7 @@ async def test_streaming_response_format():
 
     with patch("app.graph.astream") as mock_stream:
         async def mock_generator():
-            yield ("pro_opening", {"topic": "test", "pro_opening": "argument"})
+            yield {"pro_opening": {"topic": "test", "pro_opening": "argument"}}
 
         mock_stream.return_value = mock_generator()
 
@@ -63,7 +63,7 @@ async def test_streaming_completion_event():
 
     with patch("app.graph.astream") as mock_stream:
         async def mock_generator():
-            yield ("moderator_open", {"round": "opening"})
+            yield {"moderator_open": {"round": "opening"}}
 
         mock_stream.return_value = mock_generator()
         with patch("app.memory_store.upsert_debate"):
@@ -81,9 +81,9 @@ async def test_streaming_with_client_disconnect():
 
     with patch("app.graph.astream") as mock_stream:
         async def slow_generator():
-            yield ("pro_opening", {"pro_opening": "arg"})
+            yield {"pro_opening": {"pro_opening": "arg"}}
             await asyncio.sleep(10)  # Long delay to simulate timeout
-            yield ("con_opening", {"con_opening": "arg"})
+            yield {"con_opening": {"con_opening": "arg"}}
 
         mock_stream.return_value = slow_generator()
 
@@ -100,7 +100,7 @@ async def test_streaming_error_event_on_exception():
 
     with patch("app.graph.astream") as mock_stream:
         async def failing_generator():
-            yield ("pro_opening", {"pro_opening": "arg"})
+            yield {"pro_opening": {"pro_opening": "arg"}}
             raise ValueError("Test error")
 
         mock_stream.return_value = failing_generator()
@@ -129,7 +129,7 @@ async def test_streaming_cache_control_headers():
 
     with patch("app.graph.astream") as mock_stream:
         async def mock_generator():
-            yield ("test", {})
+            yield {"test": {}}
 
         mock_stream.return_value = mock_generator()
 
@@ -146,7 +146,7 @@ async def test_streaming_multiple_concurrent_debates():
 
     with patch("app.graph.astream") as mock_stream:
         async def mock_generator():
-            yield ("test", {"round": "opening"})
+            yield {"test": {"round": "opening"}}
 
         mock_stream.return_value = mock_generator()
 
@@ -168,9 +168,9 @@ async def test_streaming_state_updates_sequentially():
 
     with patch("app.graph.astream") as mock_stream:
         events = [
-            ("moderator_open", {"round": "opening"}),
-            ("pro_opening", {"pro_opening": "Pro argument", "round": "opening"}),
-            ("con_opening", {"con_opening": "Con argument", "round": "opening"}),
+            {"moderator_open": {"round": "opening"}},
+            {"pro_opening": {"pro_opening": "Pro argument", "round": "opening"}},
+            {"con_opening": {"con_opening": "Con argument", "round": "opening"}},
         ]
 
         async def mock_generator():
@@ -200,7 +200,7 @@ async def test_streaming_with_large_state_object():
         }
 
         async def mock_generator():
-            yield ("pro_opening", large_state)
+            yield {"pro_opening": large_state}
 
         mock_stream.return_value = mock_generator()
 
@@ -216,7 +216,7 @@ async def test_streaming_memory_upsert_after_completion():
 
     with patch("app.graph.astream") as mock_stream:
         async def mock_generator():
-            yield ("moderator_open", {"round": "opening"})
+            yield {"moderator_open": {"round": "opening"}}
 
         mock_stream.return_value = mock_generator()
 
@@ -237,7 +237,7 @@ async def test_streaming_json_serialization_error():
             pass
 
         async def mock_generator():
-            yield ("test", {"data": NonSerializable()})
+            yield {"test": {"data": NonSerializable()}}
 
         mock_stream.return_value = mock_generator()
 
@@ -253,9 +253,9 @@ async def test_streaming_heartbeat_on_long_processing():
 
     with patch("app.graph.astream") as mock_stream:
         async def slow_generator():
-            yield ("pro_opening", {"pro_opening": "arg"})
+            yield {"pro_opening": {"pro_opening": "arg"}}
             await asyncio.sleep(1)  # Simulate processing delay
-            yield ("con_opening", {"con_opening": "arg"})
+            yield {"con_opening": {"con_opening": "arg"}}
 
         mock_stream.return_value = slow_generator()
 
@@ -284,7 +284,7 @@ async def test_streaming_response_preserves_state_field_order():
                 "winner": "",
                 "memory_context": [],
             }
-            yield ("pro_opening", state)
+            yield {"pro_opening": state}
 
         mock_stream.return_value = mock_generator()
 

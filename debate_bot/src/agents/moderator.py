@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from langchain_anthropic import ChatAnthropic
+from langgraph.types import interrupt
 from src.core.state import DebateState
 from src.core.prompts import MODERATOR_DECISION
 
@@ -27,10 +28,26 @@ async def moderator_checkpoint(state: DebateState) -> dict:
     return {"round": next_round}
 
 
+async def audience_question(state: DebateState) -> dict:
+    """Pause once for a single audience question after the rebuttal round.
+
+    Skips the pause if a question was already pre-supplied (e.g. via the
+    synchronous /invoke endpoint), so this node is idempotent to call with
+    a question already in state.
+    """
+    if state.get("audience_question"):
+        return {}
+    question = interrupt("Submit an audience question for both debaters to address.")
+    return {"audience_question": question}
+
+
 async def moderator_decision(state: DebateState) -> dict:
     prompt = MODERATOR_DECISION.format(
         pro_closing=state["pro_closing"],
         con_closing=state["con_closing"],
+        audience_question=state.get("audience_question", ""),
+        pro_audience_answer=state.get("pro_audience_answer", ""),
+        con_audience_answer=state.get("con_audience_answer", ""),
     )
     chunks = []
     async for chunk in llm.astream(prompt):

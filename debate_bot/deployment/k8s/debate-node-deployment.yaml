@@ -1,0 +1,58 @@
+# Before applying:
+#   1. docker build -t debate-bot:local -f Dockerfile ..   (run from deployment/k8s/, or
+#      `docker build -t debate-bot:local debate_bot` from the repo root)
+#   2. Load the image into the cluster (no registry push needed for a local demo):
+#        kind load docker-image debate-bot:local --name debate-demo
+#        # or: minikube image load debate-bot:local
+#   3. kubectl create secret generic debate-secrets \
+#        --from-literal=ANTHROPIC_API_KEY=sk-ant-...
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: debate-node
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: debate-node
+  template:
+    metadata:
+      labels:
+        app: debate-node
+    spec:
+      containers:
+        - name: debate-node
+          image: debate-bot:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            - name: NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: DATABASE_URL
+              value: postgresql://postgres:postgres@postgres:5432/debate_bot
+            - name: REDIS_URL
+              value: redis://redis:6379
+            - name: MODEL_NAME
+              value: claude-haiku-4-5-20251001
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: debate-secrets
+                  key: ANTHROPIC_API_KEY
+          readinessProbe:
+            httpGet:
+              path: /debate/health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /debate/health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 10

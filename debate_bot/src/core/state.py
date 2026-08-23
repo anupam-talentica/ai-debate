@@ -13,3 +13,6 @@ class DebateState(TypedDict):
     moderator_summary: str
     winner: str
     memory_context: list[str]  # top-2 retrieved past debate summaries (empty list on first run)
+    audience_question: str      # empty until submitted via the audience-question endpoint
+    pro_audience_answer: str
+    con_audience_answer: str

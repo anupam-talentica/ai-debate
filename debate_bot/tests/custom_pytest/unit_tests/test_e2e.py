@@ -16,10 +16,19 @@ def test_health_endpoint():
 
 @pytest.mark.e2e
 def test_debate_endpoint_invoke_returns_full_state():
-    """E2E test: POST /debate/invoke must return complete debate state."""
+    """E2E test: POST /debate/invoke must return complete debate state.
+
+    Every debate now pauses after the rebuttal round for an audience
+    question, so a pre-supplied one is required for /invoke's single
+    blocking call to complete — without it, /invoke returns 409 instead
+    (see test_debate_endpoint_invoke_without_question_reports_pause).
+    """
     response = httpx.post(
         f"{BASE_URL}/debate/invoke",
-        json={"topic": "Universal basic income should be implemented"},
+        json={
+            "topic": "Universal basic income should be implemented",
+            "audience_question": "How would this be funded?",
+        },
         timeout=120.0,
     )
     assert response.status_code == 200
@@ -34,6 +43,22 @@ def test_debate_endpoint_invoke_returns_full_state():
     assert "con_opening" in state
     assert len(state["pro_opening"]) > 0
     assert len(state["con_opening"]) > 0
+    assert len(state["pro_audience_answer"]) > 0
+    assert len(state["con_audience_answer"]) > 0
+
+
+@pytest.mark.e2e
+def test_debate_endpoint_invoke_without_question_reports_pause():
+    """E2E test: POST /debate/invoke without a pre-supplied audience question
+    must report the pause explicitly (409) rather than a fake-complete 200."""
+    response = httpx.post(
+        f"{BASE_URL}/debate/invoke",
+        json={"topic": "Universal basic income should be implemented"},
+        timeout=120.0,
+    )
+    assert response.status_code == 409
+    detail = response.json()["detail"]
+    assert "run_id" in detail
 
 
 @pytest.mark.e2e
@@ -55,7 +80,7 @@ def test_debate_stream_endpoint():
         timeout=120.0,
     )
     assert response.status_code == 200
-    assert response.headers["content-type"] == "text/event-stream"
+    assert response.headers["content-type"].startswith("text/event-stream")
 
     # Verify at least some events were streamed
     events = []
