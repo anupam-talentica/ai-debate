@@ -1,0 +1,122 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "CloudFormationBootstrapAndDeploy",
+      "Effect": "Allow",
+      "Action": [
+        "cloudformation:CreateChangeSet",
+        "cloudformation:ExecuteChangeSet",
+        "cloudformation:DescribeChangeSet",
+        "cloudformation:DeleteChangeSet",
+        "cloudformation:DescribeStacks",
+        "cloudformation:DescribeStackEvents",
+        "cloudformation:DescribeStackResources",
+        "cloudformation:GetTemplate",
+        "cloudformation:CreateStack",
+        "cloudformation:UpdateStack",
+        "cloudformation:DeleteStack",
+        "cloudformation:ListStacks",
+        "cloudformation:GetTemplateSummary"
+      ],
+      "Resource": "arn:aws:cloudformation:*:557926277200:stack/*"
+    },
+    {
+      "Sid": "S3CDKAssetsBucket",
+      "Effect": "Allow",
+      "Action": [
+        "s3:CreateBucket",
+        "s3:PutBucketPolicy",
+        "s3:PutBucketVersioning",
+        "s3:PutBucketPublicAccessBlock",
+        "s3:PutEncryptionConfiguration",
+        "s3:PutLifecycleConfiguration",
+        "s3:GetBucketPolicy",
+        "s3:GetBucketLocation",
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::cdk-*-assets-557926277200-*",
+        "arn:aws:s3:::cdk-*-assets-557926277200-*/*"
+      ]
+    },
+    {
+      "Sid": "ECRCDKRepo",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:CreateRepository",
+        "ecr:SetRepositoryPolicy",
+        "ecr:PutLifecyclePolicy",
+        "ecr:PutImage",
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:InitiateLayerUpload",
+        "ecr:UploadLayerPart",
+        "ecr:CompleteLayerUpload",
+        "ecr:DeleteRepository",
+        "ecr:TagResource"
+      ],
+      "Resource": "arn:aws:ecr:*:557926277200:repository/cdk-*"
+    },
+    {
+      "Sid": "ECRAuthToken",
+      "Effect": "Allow",
+      "Action": "ecr:GetAuthorizationToken",
+      "Resource": "*"
+    },
+    {
+      "Sid": "SSMBootstrapVersion",
+      "Effect": "Allow",
+      "Action": [
+        "ssm:PutParameter",
+        "ssm:GetParameter",
+        "ssm:GetParameters",
+        "ssm:DeleteParameter",
+        "ssm:AddTagsToResource"
+      ],
+      "Resource": "arn:aws:ssm:*:557926277200:parameter/cdk-bootstrap/*"
+    },
+    {
+      "Sid": "KMSCDKAssetsKey",
+      "Effect": "Allow",
+      "Action": [
+        "kms:CreateKey",
+        "kms:CreateAlias",
+        "kms:DeleteAlias",
+        "kms:DescribeKey",
+        "kms:EnableKeyRotation",
+        "kms:PutKeyPolicy",
+        "kms:GetKeyPolicy",
+        "kms:ScheduleKeyDeletion",
+        "kms:TagResource",
+        "kms:ListAliases"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "IAMCDKExecRoles",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateRole",
+        "iam:DeleteRole",
+        "iam:GetRole",
+        "iam:AttachRolePolicy",
+        "iam:DetachRolePolicy",
+        "iam:PutRolePolicy",
+        "iam:DeleteRolePolicy",
+        "iam:GetRolePolicy",
+        "iam:TagRole",
+        "iam:PassRole"
+      ],
+      "Resource": "arn:aws:iam::557926277200:role/cdk-*"
+    },
+    {
+      "Sid": "STSAssumeCDKRoles",
+      "Effect": "Allow",
+      "Action": "sts:AssumeRole",
+      "Resource": "arn:aws:iam::557926277200:role/cdk-hnb659fds-*-role-*"
+    }
+  ]
+}

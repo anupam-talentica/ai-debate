@@ -1,0 +1,81 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Sid": "CloudFormationBootstrap",
+        "Effect": "Allow",
+        "Action": [
+          "cloudformation:CreateChangeSet",
+          "cloudformation:ExecuteChangeSet",
+          "cloudformation:DescribeChangeSet",
+          "cloudformation:DescribeStacks",
+          "cloudformation:DescribeStackEvents",
+          "cloudformation:GetTemplate",
+          "cloudformation:CreateStack",
+          "cloudformation:UpdateStack",
+          "cloudformation:DeleteStack",
+          "cloudformation:DeleteChangeSet"
+        ],
+        "Resource": "arn:aws:cloudformation:*:557926277200:stack/CDKToolkit/*"
+      },
+      {
+        "Sid": "S3BootstrapBucket",
+        "Effect": "Allow",
+        "Action": [
+          "s3:CreateBucket",
+          "s3:PutBucketPolicy",
+          "s3:PutBucketVersioning",
+          "s3:PutBucketPublicAccessBlock",
+          "s3:PutEncryptionConfiguration",
+          "s3:PutLifecycleConfiguration",
+          "s3:GetBucketPolicy",
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:ListBucket"
+        ],
+        "Resource": [
+          "arn:aws:s3:::cdk-*-assets-557926277200-*",
+          "arn:aws:s3:::cdk-*-assets-557926277200-*/*"
+        ]
+      },
+      {
+        "Sid": "ECRBootstrapRepo",
+        "Effect": "Allow",
+        "Action": [
+          "ecr:CreateRepository",
+          "ecr:SetRepositoryPolicy",
+          "ecr:PutLifecyclePolicy",
+          "ecr:DescribeRepositories"
+        ],
+        "Resource": "arn:aws:ecr:*:557926277200:repository/cdk-*"
+      },
+      {
+        "Sid": "SSMBootstrapVersion",
+        "Effect": "Allow",
+        "Action": [
+          "ssm:PutParameter",
+          "ssm:GetParameter",
+          "ssm:GetParameters"
+        ],
+        "Resource": "arn:aws:ssm:*:557926277200:parameter/cdk-bootstrap/*"
+      },
+      {
+        "Sid": "IAMBootstrapRoles",
+        "Effect": "Allow",
+        "Action": [
+          "iam:CreateRole",
+          "iam:DeleteRole",
+          "iam:GetRole",
+          "iam:AttachRolePolicy",
+          "iam:DetachRolePolicy",
+          "iam:PutRolePolicy",
+          "iam:DeleteRolePolicy",
+          "iam:GetRolePolicy",
+          "iam:TagRole",
+          "iam:PassRole"
+        ],
+        "Resource": "arn:aws:iam::557926277200:role/cdk-*"
+      }
+    ]
+  }
+  
