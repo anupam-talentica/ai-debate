@@ -1,0 +1,75 @@
+## Context
+
+The local target is complete: `src/api/routes/debates.py` exposes `/invoke`, `/start`, `/stream`, `/stream/{run_id}`, `/resume/{run_id}`, `/{run_id}/audience-question`, backed by `DebateService` (`src/api/services/debate_service.py`) and an in-process `RunRegistry` (`src/api/services/run_registry.py`) that holds a live `Graph` object, an `asyncio.Task`, and an `asyncio.Queue` per run — explicitly documented as bridging *within one process's lifetime*, not a durability layer. Durability across a process restart is a separate tier: `build_graph()` (`src/core/graph.py`) wires a `FileSessionManager` keyed by `run_id`, plus a hand-rolled `InvocationStatePersistenceHook` (`src/core/session.py`) that mirrors `invocation_state` to a sibling JSON file via raw `os.makedirs`/`tempfile`/`glob` calls against `SESSION_STORAGE_DIRECTORY`. Cross-debate memory is `ChromaMemoryStore` (`src/core/memory.py`), a local SQLite-backed `strands.memory.types.MemoryStore`, called directly (`search`/`add`) from the moderator hub node — deliberately not through Strands' agent-attached `MemoryManager` machinery (see `cross-debate-memory`'s archived design.md, Decision 1).
+
+AgentCore Runtime imposes a fixed contract regardless of what's deployed to it: one container, `POST /invocations`, `GET /ping`, port 8080, `linux/arm64`, image in ECR. Session identity is a `runtimeSessionId` the caller supplies; AWS's own devguide documents session-to-microVM affinity as a routing guarantee ("the session header... route[s] requests to the same microVM instance... Context is preserved between invocations to the same session"), governed by a configurable `idleRuntimeSessionTimeout` (default 900s, range 60-28800s on microVM compute) and `maxLifetime` (default 28800s). A session outlives any one microVM: on idle timeout it's "Stopped," and "transitions back to Active on the next invocation" with a fresh microVM — the session identity itself persists "until the AgentCore Runtime ARN is deleted." Local disk inside a microVM is ephemeral by default; AgentCore's Managed Session Storage (a mounted, auto-replicated directory) is one way to change that, but is public preview as of this change (launched March 2026), capped at 1GB/session, with data wiped after 14 days idle.
+
+## Goals / Non-Goals
+
+**Goals:**
+- Run the already-validated local graph, agents, and API surface on AgentCore Runtime with zero change to debate behavior, node contracts, or the round state machine.
+- Preserve the audience-question pause/resume semantics under AgentCore's session and request model.
+- Pick durability and memory backends that are stable (not preview-status) and that fit this project's existing "direct-call, not agent-attached" memory architecture.
+
+**Non-Goals:**
+- Any change to graph topology, node return contracts, prompts, or word-count ceilings — Phases 0-7 already validated these; this change only adds a deployment target.
+- Multi-node coordination, ownership, or heartbeat mechanisms — already out of scope project-wide (per `debate-durability`'s archived design.md).
+- Removing, renaming, or otherwise altering the existing REST surface (`src/api/routes/debates.py`) or the demo UI — both stay exactly as they are for local dev.
+- Deciding the model provider (direct Anthropic API vs. Bedrock-hosted Claude) — see Open Questions.
+
+## Decisions
+
+### 1. The AgentCore entrypoint is an additive dispatcher, not a replacement for the REST surface
+A new module adds `POST /invocations` and `GET /ping`, translating a payload's `action` field into a call on the existing `DebateService` (the same object the REST routes already call) and formatting its result/stream back into AgentCore's expected shape. `src/api/routes/debates.py` is untouched.
+
+**Alternative considered**: replace the REST surface with `/invocations` outright, since AgentCore only requires the latter. Rejected — the demo UI (`ui/streamlit_app.py`) and local development both depend on the existing multi-route surface, and the PRD's local-first sequencing (Phases 0-7) was explicitly built around keeping that surface stable and AWS-independent. Running both costs one thin dispatcher file; removing the REST surface would cost the demo UI's continued function.
+
+### 2. `run_id` doubles as `runtimeSessionId`
+No separate identifier or mapping table — the `run_id` `DebateService` already generates (`uuid.uuid4()`, satisfying AgentCore's 33+-character minimum) is passed straight through as the session id on every AgentCore call.
+
+**Alternative considered**: a separate `run_id` ↔ `runtimeSessionId` mapping. Rejected as pure indirection — nothing today requires `run_id` to be anything but an opaque string, and `RunRegistry`, `FileSessionManager`/`S3SessionManager`, and the AgentCore session are then all keyed identically, with no translation layer to keep in sync or get wrong.
+
+### 3. Keep the in-process tier as the fast path; don't rearchitect around session affinity being unverified
+AgentCore's session affinity is a documented guarantee, not best-effort, so `RunRegistry`'s live `Graph`/`Queue`/`Task` per run keeps working across the separate HTTP calls a pause-then-resume flow requires, as long as `idleRuntimeSessionTimeout` is configured to comfortably cover a realistic audience-question wait (recommend a few hours; the platform allows up to 8h on microVM compute). When that window is exceeded and the session's compute is Stopped, the *existing* `resume()` path (`DebateService.resume`, already built and tested for a plain process restart) handles it identically — AgentCore's own docs describe exactly this as a new compute being provisioned and the session "transition[ing] back to Active," not the session dying.
+
+**Alternative considered**: rearchitect so every AgentCore call is a cold resume from durable storage, treating the in-process tier as unreliable. Rejected — this would discard a working, already-tested optimization tier for no benefit, since the correctness backstop it would fall back to already exists and already covers the one case (session Stopped) where the in-process tier is unavailable.
+
+### 4. Durability backend: `S3SessionManager`, not AgentCore Managed Session Storage
+`build_graph()` swaps `FileSessionManager(session_id=run_id, storage_dir=...)` for `S3SessionManager(session_id=run_id, bucket=..., prefix=...)`. `src/core/session.py`'s `save_invocation_state`/`load_invocation_state`/`read_persisted_graph_status` are rewritten to call `S3SessionManager`'s `create_multi_agent`/`read_multi_agent` instead of `tempfile`/`glob`/`os.path` against local disk — the "sibling side-channel" design stays (Strands' own checkpoint still doesn't capture `invocation_state`, per `debate-durability`'s archived design.md, Decision 1), only its storage target changes.
+
+**Alternative considered**: AgentCore Managed Session Storage (a mount path AgentCore auto-replicates across stop/resume) — the zero-code-change option, since it's a plain POSIX filesystem and the current local-disk code would work unmodified if pointed at the mount. Rejected for this change: it is public preview with no SLA yet, caps at 1GB/session (not a real constraint at this data size, but still a platform immaturity signal), and wipes data after 14 days idle. `S3SessionManager` ships stable in Strands today, is portable beyond AgentCore, and the rewrite it requires is exactly the small, isolated piece of code `debate-durability`'s own design.md already anticipated re-pointing ("a small enough, isolated enough piece of code to re-point at that point"). Worth revisiting Managed Session Storage once it reaches GA, but not a reason to block on it now.
+
+### 5. Memory backend: Amazon S3 Vectors, not AgentCore Memory or OpenSearch Serverless
+A new `S3VectorMemoryStore` class, matching `ChromaMemoryStore`'s exact shape (`search`/`add`, `strands.memory.types.MemoryStore`), replaces it as the memory-store backend wired into `build_graph()`. No ready-made Python `MemoryStore`-conforming wrapper ships for S3 Vectors today — the `strands-s3-vectors-memory` PyPI plugin is shaped around `Agent`+prompt-injection (an `end_session`-triggered background summarize-and-store, a `{memory_context}` system-prompt placeholder), not this project's direct `search`/`add` call pattern — so this is new code written against S3 Vectors' `boto3` API (`put_vectors`/`query_vectors`), comparable in size to today's `ChromaMemoryStore`.
+
+**Alternative considered — AgentCore Memory**: rejected. Its Python integration (`AgentCoreMemorySessionManager`) is built the same agent-attached, automatic-extraction way this project already deliberately opted out of (`cross-debate-memory`'s archived design.md, Decision 1, and PRD §6's "Cross-debate memory" row: `MemoryManager`'s tool/injection machinery "assumes one Agent deciding for itself... when to recall/store facts," which doesn't fit a deterministic once-before-openings/once-after-verdict pipeline step). It also documents a one-agent-per-session limitation that sits awkwardly against this project's multi-node graph.
+
+**Alternative considered — OpenSearch Serverless**: named as an option in the PRD (§9, Open Question 6) but not pursued — heavier to provision (a managed search cluster, not a plain object-store API) for a workload this small (a few thousand short debate summaries at most), where S3 Vectors' simpler put/query primitive is a closer match to what `ChromaMemoryStore` already does.
+
+### 6. Container packaging follows Strands' "Custom Agent" pattern (full FastAPI control), not the `@app.entrypoint` SDK wrapper
+Strands' AgentCore deployment guide offers two paths: a thin SDK wrapper (`BedrockAgentCoreApp`/`@app.entrypoint`, best for a single simple agent function) or full custom FastAPI control. This project already has a multi-route FastAPI app, a service layer, SSE streaming, and a custom HITL flow — the custom path is the only one that fits without fighting the SDK wrapper's simpler shape. `Dockerfile` follows AgentCore's documented requirements: `linux/arm64` base, port 8080, `/invocations`+`/ping`.
+
+## Risks / Trade-offs
+
+- **[Risk]** A genuinely long audience-question pause (longer than the configured `idleRuntimeSessionTimeout`) lets the session's compute Stop before an answer arrives. → **Mitigation**: this degrades to exactly the process-restart case `debate-durability` already handles — `resume()` rebuilds from `S3SessionManager`'s checkpoint on the next invocation — not a failure or data loss. Configuring a multi-hour idle timeout keeps this the uncommon path.
+- **[Risk]** `InvocationStatePersistenceHook` currently writes straight to local disk via `tempfile`/`os.replace`, not through any storage-abstraction interface — swapping its target isn't a one-line config change. → **Mitigation**: scoped as originally anticipated — only `src/core/session.py`'s handful of functions change, to call `S3SessionManager.create_multi_agent`/`read_multi_agent` instead of local-disk primitives; the hook's trigger points (`AfterNodeCallEvent`/`AfterMultiAgentInvocationEvent`) and its role as a sibling side-channel to Strands' own checkpoint are unchanged.
+- **[Risk]** S3 Vectors is young (GA December 2025, ~8 months old at this change). → **Mitigation**: `cross-debate-memory`'s own spec already requires memory-retrieval failures to degrade to "no context" rather than block a debate (`Requirement: Memory retrieval failure never blocks a debate`) — this feature's blast radius from backend immaturity is already bounded by an existing requirement, not something this change needs to newly guard against.
+- **[Trade-off]** Choosing `S3SessionManager` + S3 Vectors over AgentCore-native equivalents (Managed Session Storage, AgentCore Memory) means this deployment still owns and provisions its own S3 bucket, S3 Vectors index, and IAM permissions, rather than using AgentCore-managed storage with zero extra AWS resources. → **Accepted**: matching this project's existing architecture (direct `MemoryStore` calls; a real session-manager interface rather than a raw mount) and avoiding two preview/early-stage integration paths is worth more here than minimizing the AWS resource count.
+- **[Risk]** The new `/invocations` dispatcher is a genuinely new code path (payload → action → `DebateService` call → response/stream shape), separate from the well-exercised REST routes it wraps. → **Mitigation**: kept deliberately thin — it translates and delegates, with no debate logic of its own — so the new surface needing new test coverage is small; `DebateService` itself and its existing tests (`tests/test_api.py`, `tests/test_durability.py`, etc.) are untouched and continue to cover the actual debate behavior.
+
+## Migration Plan
+
+No data migration — this is a new deployment target for an already-running local system, not a change to existing persisted data.
+
+1. Provision AWS resources: an S3 bucket for session checkpoints, an S3 Vectors bucket + index for cross-debate memory, an ECR repository, and an IAM execution role scoped to those plus AgentCore Runtime's own requirements.
+2. Implement and verify the `S3SessionManager` and `S3VectorMemoryStore` swaps against real AWS resources, confirming existing local-mode tests still pass unmodified (they exercise `FileSessionManager`/`ChromaMemoryStore`, untouched by this change) and adding integration coverage for the S3-backed paths.
+3. Implement and verify the `/invocations`+`/ping` dispatcher against a local `uvicorn` process first (no AgentCore involved), matching AgentCore's documented request/response shapes.
+4. Build and push the `linux/arm64` container image; deploy via `create_agent_runtime` with a generous `idleRuntimeSessionTimeout`.
+5. End-to-end verify on AgentCore Runtime itself: start a debate, let it pause on the audience question, submit an answer after a deliberate delay, confirm resume and a completed verdict; confirm CloudWatch traces appear.
+
+**Rollback**: this change is additive at the code level — a new entrypoint file plus two backend swaps sitting behind interfaces (`SessionManager`, `MemoryStore`) that already existed for this purpose. If the AgentCore deployment doesn't work out, local dev (`FileSessionManager`, `ChromaMemoryStore`, the existing REST surface) is untouched throughout and keeps working; reverting means deleting the AgentCore Runtime resource and the new entrypoint file.
+
+## Open Questions
+
+- **Model provider on AgentCore**: keep `AnthropicModel` calling the direct Anthropic API (no change from local), or switch to `BedrockModel` for Claude via Bedrock (drops the separate `ANTHROPIC_API_KEY` secret in favor of the execution role's IAM permissions)? Deferred — this is a model-layer swap independent of the transport/storage decisions above, doesn't affect the specs or task breakdown here, and can be made before or after this change ships.
+- **`S3VectorMemoryStore`'s embedding model**: which Bedrock embedding model to call (matching `ChromaMemoryStore`'s current MiniLM quality class) is an implementation detail for that task, not a design-level decision.

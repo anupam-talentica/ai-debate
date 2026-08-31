@@ -1,0 +1,29 @@
+{
+  "type": "graph",
+  "id": "default_graph",
+  "status": "executing",
+  "completed_nodes": [],
+  "failed_nodes": [],
+  "interrupted_nodes": [],
+  "node_results": {},
+  "next_nodes_to_execute": [],
+  "current_task": "run",
+  "execution_order": [],
+  "accumulated_usage": {
+    "inputTokens": 0,
+    "outputTokens": 0,
+    "totalTokens": 0
+  },
+  "accumulated_metrics": {
+    "latencyMs": 0
+  },
+  "execution_count": 0,
+  "execution_time": 0,
+  "_internal_state": {
+    "interrupt_state": {
+      "interrupts": {},
+      "context": {},
+      "activated": false
+    }
+  }
+}

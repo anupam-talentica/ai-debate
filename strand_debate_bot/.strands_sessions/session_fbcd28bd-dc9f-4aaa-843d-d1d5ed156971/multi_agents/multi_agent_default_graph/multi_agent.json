@@ -1,0 +1,388 @@
+{
+  "type": "graph",
+  "id": "default_graph",
+  "status": "completed",
+  "completed_nodes": [
+    "con_rebuttal",
+    "con_closing",
+    "pro_rebuttal",
+    "pro_opening",
+    "con_opening",
+    "moderator_decision",
+    "moderator",
+    "pro_addresses_question",
+    "con_addresses_question",
+    "pro_closing",
+    "audience_question"
+  ],
+  "failed_nodes": [],
+  "interrupted_nodes": [],
+  "node_results": {
+    "moderator": {
+      "result": {
+        "type": "multiagent_result",
+        "status": "completed",
+        "results": {},
+        "accumulated_usage": {
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "totalTokens": 0
+        },
+        "accumulated_metrics": {
+          "latencyMs": 0
+        },
+        "execution_count": 0,
+        "execution_time": 0,
+        "interrupts": []
+      },
+      "execution_time": 0,
+      "status": "completed",
+      "accumulated_usage": {
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "totalTokens": 0
+      },
+      "accumulated_metrics": {
+        "latencyMs": 0
+      },
+      "execution_count": 0,
+      "interrupts": []
+    },
+    "pro_opening": {
+      "result": {
+        "type": "multiagent_result",
+        "status": "completed",
+        "results": {},
+        "accumulated_usage": {
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "totalTokens": 0
+        },
+        "accumulated_metrics": {
+          "latencyMs": 0
+        },
+        "execution_count": 0,
+        "execution_time": 0,
+        "interrupts": []
+      },
+      "execution_time": 0,
+      "status": "completed",
+      "accumulated_usage": {
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "totalTokens": 0
+      },
+      "accumulated_metrics": {
+        "latencyMs": 0
+      },
+      "execution_count": 0,
+      "interrupts": []
+    },
+    "con_opening": {
+      "result": {
+        "type": "multiagent_result",
+        "status": "completed",
+        "results": {},
+        "accumulated_usage": {
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "totalTokens": 0
+        },
+        "accumulated_metrics": {
+          "latencyMs": 0
+        },
+        "execution_count": 0,
+        "execution_time": 0,
+        "interrupts": []
+      },
+      "execution_time": 0,
+      "status": "completed",
+      "accumulated_usage": {
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "totalTokens": 0
+      },
+      "accumulated_metrics": {
+        "latencyMs": 0
+      },
+      "execution_count": 0,
+      "interrupts": []
+    },
+    "pro_rebuttal": {
+      "result": {
+        "type": "multiagent_result",
+        "status": "completed",
+        "results": {},
+        "accumulated_usage": {
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "totalTokens": 0
+        },
+        "accumulated_metrics": {
+          "latencyMs": 0
+        },
+        "execution_count": 0,
+        "execution_time": 0,
+        "interrupts": []
+      },
+      "execution_time": 0,
+      "status": "completed",
+      "accumulated_usage": {
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "totalTokens": 0
+      },
+      "accumulated_metrics": {
+        "latencyMs": 0
+      },
+      "execution_count": 0,
+      "interrupts": []
+    },
+    "con_rebuttal": {
+      "result": {
+        "type": "multiagent_result",
+        "status": "completed",
+        "results": {},
+        "accumulated_usage": {
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "totalTokens": 0
+        },
+        "accumulated_metrics": {
+          "latencyMs": 0
+        },
+        "execution_count": 0,
+        "execution_time": 0,
+        "interrupts": []
+      },
+      "execution_time": 0,
+      "status": "completed",
+      "accumulated_usage": {
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "totalTokens": 0
+      },
+      "accumulated_metrics": {
+        "latencyMs": 0
+      },
+      "execution_count": 0,
+      "interrupts": []
+    },
+    "audience_question": {
+      "result": {
+        "type": "multiagent_result",
+        "status": "completed",
+        "results": {},
+        "accumulated_usage": {
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "totalTokens": 0
+        },
+        "accumulated_metrics": {
+          "latencyMs": 0
+        },
+        "execution_count": 0,
+        "execution_time": 0,
+        "interrupts": []
+      },
+      "execution_time": 0,
+      "status": "completed",
+      "accumulated_usage": {
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "totalTokens": 0
+      },
+      "accumulated_metrics": {
+        "latencyMs": 0
+      },
+      "execution_count": 0,
+      "interrupts": []
+    },
+    "pro_addresses_question": {
+      "result": {
+        "type": "multiagent_result",
+        "status": "completed",
+        "results": {},
+        "accumulated_usage": {
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "totalTokens": 0
+        },
+        "accumulated_metrics": {
+          "latencyMs": 0
+        },
+        "execution_count": 0,
+        "execution_time": 0,
+        "interrupts": []
+      },
+      "execution_time": 0,
+      "status": "completed",
+      "accumulated_usage": {
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "totalTokens": 0
+      },
+      "accumulated_metrics": {
+        "latencyMs": 0
+      },
+      "execution_count": 0,
+      "interrupts": []
+    },
+    "con_addresses_question": {
+      "result": {
+        "type": "multiagent_result",
+        "status": "completed",
+        "results": {},
+        "accumulated_usage": {
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "totalTokens": 0
+        },
+        "accumulated_metrics": {
+          "latencyMs": 0
+        },
+        "execution_count": 0,
+        "execution_time": 0,
+        "interrupts": []
+      },
+      "execution_time": 0,
+      "status": "completed",
+      "accumulated_usage": {
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "totalTokens": 0
+      },
+      "accumulated_metrics": {
+        "latencyMs": 0
+      },
+      "execution_count": 0,
+      "interrupts": []
+    },
+    "pro_closing": {
+      "result": {
+        "type": "multiagent_result",
+        "status": "completed",
+        "results": {},
+        "accumulated_usage": {
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "totalTokens": 0
+        },
+        "accumulated_metrics": {
+          "latencyMs": 0
+        },
+        "execution_count": 0,
+        "execution_time": 0,
+        "interrupts": []
+      },
+      "execution_time": 0,
+      "status": "completed",
+      "accumulated_usage": {
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "totalTokens": 0
+      },
+      "accumulated_metrics": {
+        "latencyMs": 0
+      },
+      "execution_count": 0,
+      "interrupts": []
+    },
+    "con_closing": {
+      "result": {
+        "type": "multiagent_result",
+        "status": "completed",
+        "results": {},
+        "accumulated_usage": {
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "totalTokens": 0
+        },
+        "accumulated_metrics": {
+          "latencyMs": 0
+        },
+        "execution_count": 0,
+        "execution_time": 0,
+        "interrupts": []
+      },
+      "execution_time": 0,
+      "status": "completed",
+      "accumulated_usage": {
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "totalTokens": 0
+      },
+      "accumulated_metrics": {
+        "latencyMs": 0
+      },
+      "execution_count": 0,
+      "interrupts": []
+    },
+    "moderator_decision": {
+      "result": {
+        "type": "multiagent_result",
+        "status": "completed",
+        "results": {},
+        "accumulated_usage": {
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "totalTokens": 0
+        },
+        "accumulated_metrics": {
+          "latencyMs": 0
+        },
+        "execution_count": 0,
+        "execution_time": 0,
+        "interrupts": []
+      },
+      "execution_time": 0,
+      "status": "completed",
+      "accumulated_usage": {
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "totalTokens": 0
+      },
+      "accumulated_metrics": {
+        "latencyMs": 0
+      },
+      "execution_count": 0,
+      "interrupts": []
+    }
+  },
+  "next_nodes_to_execute": [],
+  "current_task": "run",
+  "execution_order": [
+    "moderator",
+    "pro_opening",
+    "con_opening",
+    "moderator",
+    "pro_rebuttal",
+    "con_rebuttal",
+    "moderator",
+    "audience_question",
+    "pro_addresses_question",
+    "con_addresses_question",
+    "moderator",
+    "pro_closing",
+    "con_closing",
+    "moderator",
+    "moderator_decision"
+  ],
+  "accumulated_usage": {
+    "inputTokens": 0,
+    "outputTokens": 0,
+    "totalTokens": 0
+  },
+  "accumulated_metrics": {
+    "latencyMs": 0
+  },
+  "execution_count": 0,
+  "execution_time": 33495,
+  "_internal_state": {
+    "interrupt_state": {
+      "interrupts": {},
+      "context": {},
+      "activated": false
+    }
+  }
+}
